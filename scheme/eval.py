@@ -10,3 +10,9 @@ def Eval(obj):
         obj = cStringIO.StringIO(obj)
     ast = parser.Parser(obj).ast
     return p.process(ast)
+
+def Exec(ast):
+    #print 15, ast
+    ret = p.process(ast)
+    #print 17, ret
+    return ret

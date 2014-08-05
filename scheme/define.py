@@ -37,7 +37,10 @@ class define(object):
                 processer.process(retval, env)
             else:
                 env[name] = SimpleProcedure([args] + rest, env).setName(name)
-        return [lambda *x: None]
+        processer.popStack(None)
+        #processer.ast[processer.stackPointer]=None
+        processer.stackPointer+=1
+        return None
 
 
 class Set(object):
@@ -59,7 +62,10 @@ class Set(object):
             if not name.isBound(env):
                 raise NameError("Name %s unbound in enclosing namespaces" % name)
             name.getEnv(env)[name] = SimpleProcedure([args] + rest, processer.cenv.parent).setName(name)
-        return [lambda *x: None]
+        #processer.ast[processer.stackPointer]=None
+        processer.popStack(None)
+        processer.stackPointer+=1
+        return None
 
 
 class defmacro(object):
@@ -67,12 +73,22 @@ class defmacro(object):
     def __init__(self):
         pass
     def __call__(self, processer, params):
-        name = params[0][0]
-        args = params[0][1:]
-        rest = params[1:]
-        env = processer.cenv.parent if processer.cenv is not Globals.Globals else Globals.Globals
-        env[name] = SimpleMacro([args] + rest, env).setName(name)
-        return [lambda *x: None]
+        if len(params) == 2 and ((isinstance(params[1], list) and params[1][0]=='lambda') or not (isinstance(params[1], list))):
+            name = params[0]
+            env = processer.cenv.parent if processer.cenv is not Globals.Globals else Globals.Globals
+            proc = processer.process([params[1]], env)
+            env[name] = SimpleMacro.wrappedMacro(proc, env)
+
+        else:
+            name = params[0][0]
+            args = params[0][1:]
+            rest = params[1:]
+            env = processer.cenv.parent if processer.cenv is not Globals.Globals else Globals.Globals
+            env[name] = SimpleMacro([args] + rest, env).setName(name)
+        #processer.ast[processer.stackPointer]=None
+        processer.popStack(None)
+        processer.stackPointer+=1
+        return None
 
 
 Globals.Globals['define'] = define()

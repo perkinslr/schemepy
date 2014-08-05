@@ -15,8 +15,6 @@ class IF(object):
         conditional = params[0]
         if_true = params[1]
         if_false = params[2] if len(params) == 3 else False
-        print 18, if_true
-        print 19, if_false
         env = processer.cenv
         if isinstance(conditional, list):
             if processer.process([conditional], env):

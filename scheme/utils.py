@@ -25,6 +25,8 @@ def copy_with_quote(lst):
     from scheme.macro import MacroSymbol
     if not isinstance(lst, list):
         if isinstance(lst, Symbol):
+            if lst.isBound(None):
+                return MacroSymbol(lst).setEnv({lst: lst.toObject(None)})
             return MacroSymbol(lst).setEnv({lst: lst})
         return lst
     o = []
@@ -45,10 +47,11 @@ def copy_with_quasiquote(processer, env, lst, lastlst = None, lastidx = None, os
                 retval = processer.process([qqtarget], env)
                 return retval, True
             if lst == ',':
-
+                #print 48
                 qqtarget=lastlst.pop(lastidx+1)
-
+                #print qqtarget
                 retval = processer.process([qqtarget], env)
+                #print 52, retval
                 return retval, False
             if lastidx == 0 and lst.isBound(Globals) and isinstance(lst.toObject(Globals), unquotesplicing):
 

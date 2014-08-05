@@ -18,7 +18,6 @@ class quote(object):
             raise SyntaxError("quote accepts only 1 argument")
         processer.popStack(copy_with_quote(params)[0])
         processer.stackPointer+=1
-
         return None
 
 

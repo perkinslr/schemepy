@@ -56,6 +56,7 @@ class Processer:
         self.ast=None
         self.callDepth=0
     def process(self, _ast, env=None, callDepth=None):
+
         if _ast==[[]]:
             raise SyntaxError()
         """
@@ -89,7 +90,15 @@ class Processer:
                     self.popStack(this)
                 else:
                     return this
-
+            if len(self.ast)==1 and not isinstance(self.ast[0], list):
+                if isinstance(self.ast[0], Symbol):
+                    this = self.ast[0].toObject(self.cenv)
+                else:
+                    this = self.ast[0]
+                if self.callDepth:
+                    self.popStack(this)
+                else:
+                    return this
             while True:
                 if self.stackPointer >= len(self.ast) and self.callDepth <= self.initialCallDepth:
                     return self.ast[-1]
@@ -171,7 +180,7 @@ class Processer:
 
                 self.stackPointer += 1
         except Empty:
-            print "Rising from call/cc or macro"
+            #print "Rising from call/cc or macro"
             return self.ast[-1]
 
 

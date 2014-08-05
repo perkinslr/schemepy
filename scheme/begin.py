@@ -11,7 +11,6 @@ class begin(object):
         pass
     def __call__(self, processer, params):
         env = processer.cenv
-        print params
         #for param in params[:-1]:
         #    processer.process(param, env)
         for param in params[:-1]:
