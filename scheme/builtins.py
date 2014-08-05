@@ -31,10 +31,11 @@ def add_globals(self):
         'null?': lambda x: x == [],
         'boolean?': lambda x: isa(x, bool), 'pair?': is_pair,
         'port?': lambda x: isa(x, file), 'apply': lambda proc, l: proc(*l),
-
+        'map':map,
+        'in': lambda x,y:x in y,
         'open-input-file': open, 'close-input-port': lambda p: p.file.close(),
         'open-output-file': lambda f: open(f, 'w'), 'close-output-port': lambda p: p.close(),
-
+        'bool':bool,
         'display': lambda x, port=sys.stdout: port.write(x.replace('~n', '\n') if isa(x, (str, unicode)) else str(x))})
     return self
 

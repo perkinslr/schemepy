@@ -9,7 +9,7 @@ class Symbol(unicode):
             env = env.parent
         if self.lstrip('-').isdigit():
             return int(self)
-        if self.lstrip('-').replace('.', '').isdigit():
+        if self.replace('-','').replace('.', '').replace('e','').isdigit():
             return float(self)
         if self[0] == self[-1] == '"':
             return self[1:-1]
@@ -17,7 +17,10 @@ class Symbol(unicode):
             return True
         if self == '#f':
             return False
-        raise NameError(u"Symbol '%s' undefined" % self)
+        try:
+            return complex(self.replace('i','j',1))
+        except:
+            raise NameError(u"Symbol '%s' undefined" % self)
     def isBound(self, env):
         try:
             self.toObject(env)
@@ -33,3 +36,5 @@ class Symbol(unicode):
                         self == '#t' or self == '#f':
             return Globals
         raise NameError(u"Symbol '%s' undefined" % self)
+    def __repr__(self):
+        return '<Symbol %s>' % self

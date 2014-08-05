@@ -31,6 +31,7 @@ class SimpleMacro(object):
     def __init__(self, ast, env):
         self.ast = ast
         self.env = env
+        self.name=None
     # noinspection PyUnusedLocal
     def __call__(self, processer, args):
         retval = None
@@ -41,7 +42,6 @@ class SimpleMacro(object):
                 item = None
                 for idx, item in enumerate(self.ast[0][:-2]):
                     i = args[idx]
-                    print 30, item, i
                     env[item] = i
                 env[self.ast[0][-1]] = args[idx:]
             else:
@@ -51,5 +51,11 @@ class SimpleMacro(object):
         else:
             env[self.ast[0]] = args[0]
         retval = copy_with_replacement([Symbol('begin')] + self.ast[1:], **env)
-        print 52, retval
         return retval
+    def setName(self, name):
+        self.name=name
+        return self
+    def __repr__(self):
+        if self.name:
+            return '<SimpleMacro %s>'%self.name
+        return object.__repr__(self)

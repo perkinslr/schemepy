@@ -34,6 +34,8 @@ class Processer:
         self.cenv = continuation['env']
         self.stackPointer = continuation['stackPointer']
         self.popStack(retval)
+        print 37, self.ast
+
     continuation = property(getContinuation, setContinuation)
     def pushStack(self, ast):
 
@@ -47,7 +49,19 @@ class Processer:
         self.ast, self.cenv, self.stackPointer = self.callStack.get_nowait()
         self.callDepth -= 1
         self.ast[self.stackPointer] = retval
+    def dumpStack(self):
+        print "Dumping stack"
+        while self.callDepth > 0:
+            self.popStack(None)
+        self.stackPointer=0
+        self.cenv=None
+        self.initialCallDepth=0
+        self.ast=None
+        self.callDepth=0
     def process(self, _ast, env=None, callDepth=None):
+        if _ast==[[]]:
+            print 52
+            raise SyntaxError()
         """
 
 
@@ -77,18 +91,22 @@ class Processer:
                     return self.ast.toObject(self.cenv)
 
             while True:
-                if self.stackPointer >= len(self.ast) and self.callDepth == self.initialCallDepth:
+                if self.stackPointer >= len(self.ast) and self.callDepth <= self.initialCallDepth:
                     return self.ast[-1]
                 if self.stackPointer >= len(self.ast):
+                    for idx, i in enumerate(self.ast):
+                        if isinstance(i, Symbol):
+                            self.ast[idx]=i.toObject(self.cenv)
                     initial_call_depth = self.initialCallDepth
                     if isinstance(self.ast[0], Symbol):
                         self.ast[0] = self.ast[0].toObject(self.cenv)
                     if Procedure in providedBy(self.ast[0]):
-
                         self.popStack(self.ast[0](self, self.ast[1:]))
                     else:
-                        self.popStack(self.ast[0](*self.ast[1:]))
+                        r = self.ast[0](*self.ast[1:])
+                        self.popStack(r)
                     self.initialCallDepth = initial_call_depth
+                    self.stackPointer+=1
                     continue
                 this = self.ast[self.stackPointer]
                 if isinstance(this, list):
@@ -97,10 +115,13 @@ class Processer:
                 if isinstance(this, Symbol) and this.isBound(self.cenv):
                     t = this.toObject(self.cenv)
                 else:
-                    t = this;
+                    t = this
                 if self.stackPointer == 0 and Macro in providedBy(t):
                     initial_call_depth = self.initialCallDepth
                     r = t(self, self.ast[1:])
+                    if r is None:
+                        self.initialCallDepth = initial_call_depth
+                        continue
                     if not isinstance(r, list):
                         r1 = [lambda *x: r]
                         self.ast[:] = r1
@@ -119,3 +140,4 @@ class Processer:
 
 
 
+processer=Processer()

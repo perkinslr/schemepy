@@ -1,3 +1,4 @@
+from Queue import Empty
 from zope.interface import implements
 
 from scheme.procedure import Procedure
@@ -22,7 +23,10 @@ class callccCallback():
         self.continuation = continuation
     def __call__(self, processer, ast):
         processer.setContinuation([self.continuation, ast[0]])
-        return processer.process(processer.ast, processer.cenv, callDepth=0)
+        ret = processer.process(processer.ast, processer.cenv, 1)
+        processer.dumpStack()
+        processer.ast=[ret]
+        raise Empty()
 
 
 Globals.Globals['call/cc'] = callcc()

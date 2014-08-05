@@ -21,7 +21,8 @@ class Parser(object):
         while True:
             if self.line == '':
                 self.line = self.file.readline()
-            if self.line == '':
+            if self.line == '' or self.line=='\n':
+                self.line=''
                 break
             # noinspection PyUnresolvedReferences
             token, self.line = re.match(self.tokenizer, self.line).groups()
@@ -50,7 +51,7 @@ class Parser(object):
             if t is self.eof_object:
                 return o
             o.append(read_ahead(t))
-
+            return o
 
 
 

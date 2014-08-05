@@ -10,9 +10,8 @@ class begin(object):
     def __init__(self):
         pass
     def __call__(self, processer, params):
-        env = processer.cenv.parent
-        ret = processer.process(params, env)
-        return ret
+        return params[-1]
+
 
 
 Globals['begin'] = begin()
