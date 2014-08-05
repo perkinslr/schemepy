@@ -2,7 +2,7 @@ from zope import interface
 
 
 # noinspection PyUnusedLocal
-from scheme.debug import DEBUG
+from scheme import debug
 from scheme.environment import Environment
 from scheme.symbol import Symbol
 from scheme.utils import deepcopy
@@ -41,7 +41,7 @@ class SimpleProcedure(object):
                     env[item] = i
         else:
             env[self.ast[0]] = args
-        if DEBUG:
+        if debug.DEBUG:
             print env
         for i in self.ast[1:]:
             retval = processer.process(deepcopy([i]), env)

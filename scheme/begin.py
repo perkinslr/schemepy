@@ -1,17 +1,25 @@
 __author__ = 'jeanie'
 
-from scheme.procedure import Procedure
 from scheme.Globals import Globals
 from zope.interface import implements
+from scheme.macro import Macro
 
 
 class begin(object):
-    implements(Procedure)
+    implements(Macro)
     def __init__(self):
         pass
     def __call__(self, processer, params):
-        return params[-1]
-
+        env = processer.cenv
+        print params
+        #for param in params[:-1]:
+        #    processer.process(param, env)
+        for param in params[:-1]:
+            processer.process([param], env.parent)
+        ret = processer.process([params[-1]], env.parent)
+        processer.popStack(ret)
+        processer.stackPointer+=1
+        return
 
 
 Globals['begin'] = begin()

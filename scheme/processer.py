@@ -19,7 +19,6 @@ class Processer:
         self.callStack = LifoQueue()
         self.callDepth = 0
         self.env = Globals.Globals
-        self.macros = dict(Globals.Macros)
         self.ast = None
         self.stackPointer = 0
         self.cenv = None
@@ -34,7 +33,6 @@ class Processer:
         self.cenv = continuation['env']
         self.stackPointer = continuation['stackPointer']
         self.popStack(retval)
-        print 37, self.ast
 
     continuation = property(getContinuation, setContinuation)
     def pushStack(self, ast):
@@ -50,7 +48,6 @@ class Processer:
         self.callDepth -= 1
         self.ast[self.stackPointer] = retval
     def dumpStack(self):
-        print "Dumping stack"
         while self.callDepth > 0:
             self.popStack(None)
         self.stackPointer=0
@@ -60,7 +57,6 @@ class Processer:
         self.callDepth=0
     def process(self, _ast, env=None, callDepth=None):
         if _ast==[[]]:
-            print 52
             raise SyntaxError()
         """
 
@@ -109,6 +105,42 @@ class Processer:
                     self.stackPointer+=1
                     continue
                 this = self.ast[self.stackPointer]
+                if this == "'":
+                    quoteTarget=self.ast.pop(self.stackPointer+1)
+                    if quoteTarget=="'":
+                        def getQuoteTarget():
+                            qt = self.ast.pop(self.stackPointer+1)
+                            if qt == "'":
+                                return [Symbol('quote'), getQuoteTarget()]
+                            return qt
+                        quoteTarget=[Symbol('quote'), getQuoteTarget()]
+                    self.ast[self.stackPointer]=[Symbol('quote'), quoteTarget]
+                    continue
+                elif this == "`":
+
+                    quoteTarget=self.ast.pop(self.stackPointer+1)
+                    if quoteTarget=="`":
+                        def getQuoteTarget():
+                            qt = self.ast.pop(self.stackPointer+1)
+                            if qt == "`":
+                                return [Symbol('quasiquote'), getQuoteTarget()]
+                            return qt
+                        quoteTarget=[Symbol('quasiquote'), getQuoteTarget()]
+                    self.ast[self.stackPointer]=[Symbol('quasiquote'), quoteTarget]
+
+                    continue
+                elif this == ",":
+
+                    quoteTarget=self.ast.pop(self.stackPointer+1)
+                    if quoteTarget==",":
+                        def getQuoteTarget():
+                            qt = self.ast.pop(self.stackPointer+1)
+                            if qt == ",":
+                                return [Symbol('unquote'), getQuoteTarget()]
+                            return qt
+                        quoteTarget=[Symbol('unquote'), getQuoteTarget()]
+                    self.ast[self.stackPointer]=[Symbol('unquote'), quoteTarget]
+                    continue
                 if isinstance(this, list):
                     self.pushStack(this)
                     continue

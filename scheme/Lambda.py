@@ -17,7 +17,7 @@ class Lambda(object):
         rest = params[1:]
         t = repr(time.time())
         return MacroSymbol('lambda:%s' % t).setEnv(
-            {('lambda:%s' % t): SimpleProcedure([args] + rest, processer.cenv.parent).setName("lambda:%s"%t)})
+            {('lambda:%s' % t): SimpleProcedure([args] + rest, processer.cenv).setName("lambda:%s"%t)})
 
 
 Globals.Globals['lambda'] = Lambda()

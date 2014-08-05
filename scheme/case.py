@@ -14,9 +14,9 @@ class case(object):
         pass
     def __call__(self, processer, params):
         if isinstance(params[0], list):
-            key = processer.process([params[0]], processer.cenv.parent)
+            key = processer.process([params[0]], processer.cenv)
         else:
-            key=params[0].toObject(processer.cenv.parent)
+            key=params[0].toObject(processer.cenv)
         clauses=params[1:]
         ret=[]
         begun=False
@@ -30,9 +30,9 @@ class case(object):
                 ret.extend(clause[1:])
             else:
                 if isinstance(clause[0], list):
-                    val = processer.process([clause[0]], processer.cenv.parent)
+                    val = processer.process([clause[0]], processer.cenv)
                 else:
-                    val=clause[0].toObject(processer.cenv.parent)
+                    val=clause[0].toObject(processer.cenv)
                 if key == val or (isinstance(val, list) and key in val):
                     begun=True
                     if clause[-1]=='break':

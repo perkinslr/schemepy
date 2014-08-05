@@ -50,8 +50,12 @@ class SimpleMacro(object):
                     env[item] = i
         else:
             env[self.ast[0]] = args[0]
-        retval = copy_with_replacement([Symbol('begin')] + self.ast[1:], **env)
-        return retval
+        retval = copy_with_replacement(self.ast[1:], **env)
+        print 54, retval
+        retval = processer.process(retval, processer.cenv)
+        print 56, retval
+        processer.popStack(retval)
+        return
     def setName(self, name):
         self.name=name
         return self

@@ -1,3 +1,4 @@
+from scheme import debug
 from scheme.Globals import Globals
 
 
@@ -37,4 +38,6 @@ class Symbol(unicode):
             return Globals
         raise NameError(u"Symbol '%s' undefined" % self)
     def __repr__(self):
-        return '<Symbol %s>' % self
+        if debug.DEBUG:
+            return '<Symbol %s>' % self
+        return str(self)

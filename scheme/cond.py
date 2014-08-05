@@ -9,7 +9,7 @@ class cond(object):
     def __init__(self):
         pass
     def __call__(self, processer, params):
-        env=processer.cenv.parent
+        env=processer.cenv
         for pair in params:
             if pair[0]=="else":
                 return pair[1]
