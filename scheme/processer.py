@@ -81,10 +81,14 @@ class Processer:
             self.ast = _ast
             self.stackPointer = 0;
             if not isinstance(self.ast, list):
-                if self.callDepth:
-                    self.popStack(self.ast.toObject(self.cenv))
+                if isinstance(self.ast, Symbol):
+                    this = self.ast.toObject(self.cenv)
                 else:
-                    return self.ast.toObject(self.cenv)
+                    this = self.ast
+                if self.callDepth:
+                    self.popStack(this)
+                else:
+                    return this
 
             while True:
                 if self.stackPointer >= len(self.ast) and self.callDepth <= self.initialCallDepth:
@@ -130,7 +134,6 @@ class Processer:
 
                     continue
                 elif this == ",":
-
                     quoteTarget=self.ast.pop(self.stackPointer+1)
                     if quoteTarget==",":
                         def getQuoteTarget():
@@ -146,6 +149,8 @@ class Processer:
                     continue
                 if isinstance(this, Symbol) and this.isBound(self.cenv):
                     t = this.toObject(self.cenv)
+                    while isinstance(t, Symbol) and t.isBound(self.cenv):
+                        t = t.toObject(self.cenv)
                 else:
                     t = this
                 if self.stackPointer == 0 and Macro in providedBy(t):
@@ -166,7 +171,7 @@ class Processer:
 
                 self.stackPointer += 1
         except Empty:
-            print "Rising from call/cc"
+            print "Rising from call/cc or macro"
             return self.ast[-1]
 
 

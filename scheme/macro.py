@@ -43,7 +43,7 @@ class SimpleMacro(object):
                 for idx, item in enumerate(self.ast[0][:-2]):
                     i = args[idx]
                     env[item] = i
-                env[self.ast[0][-1]] = args[idx:]
+                env[self.ast[0][-1]] = [lambda *x: args[idx:]]
             else:
                 for idx, item in enumerate(self.ast[0]):
                     i = args[idx]
@@ -54,6 +54,8 @@ class SimpleMacro(object):
         print 54, retval
         retval = processer.process(retval, processer.cenv)
         print 56, retval
+        retval = processer.process(retval, processer.cenv)
+        print 58, retval
         processer.popStack(retval)
         return
     def setName(self, name):
