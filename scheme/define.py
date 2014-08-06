@@ -73,7 +73,7 @@ class defmacro(object):
     def __init__(self):
         pass
     def __call__(self, processer, params):
-        if len(params) == 2 and ((isinstance(params[1], list) and params[1][0]=='lambda') or not (isinstance(params[1], list))):
+        if len(params) == 2 and not isinstance(params[0], list) and ((isinstance(params[1], list) and params[1][0]=='lambda') or not (isinstance(params[1], list))):
             name = params[0]
             env = processer.cenv.parent if processer.cenv is not Globals.Globals else Globals.Globals
             proc = processer.process([params[1]], env)

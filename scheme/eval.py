@@ -1,3 +1,4 @@
+from Queue import Empty
 import cStringIO
 import parser
 
@@ -9,10 +10,15 @@ def Eval(obj):
     if isinstance(obj, (str, unicode)):
         obj = cStringIO.StringIO(obj)
     ast = parser.Parser(obj).ast
-    return p.process(ast)
+    try:
+        ret = p._process(ast)
+    except Empty as e:
+        ret = e.ret
+    return ret
 
 def Exec(ast):
-    #print 15, ast
-    ret = p.process(ast)
-    #print 17, ret
+    try:
+        ret = p._process(ast)
+    except Empty as e:
+        ret = e.ret
     return ret

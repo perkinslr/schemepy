@@ -12,6 +12,11 @@ is_pair = lambda x: x != [] and isa(x, list)
 
 isa = isinstance
 
+def throw(e):
+    raise e
+
+def last(o):
+    return o[-1]
 
 def add_globals(self):
     """Add some Scheme standard procedures."""
@@ -19,6 +24,8 @@ def add_globals(self):
     self.update(vars(math))
     self.update(vars(cmath))
     self.update({
+        'throw': throw,
+        'Exception': Exception,
         'type': type,
         '**': op.pow,
         '+': op.add, '-': op.sub, '*': op.mul, '/': op.div, 'not': op.not_,
@@ -38,6 +45,7 @@ def add_globals(self):
         'open-output-file': lambda f: open(f, 'w'), 'close-output-port': lambda p: p.close(),
         'bool':bool,
         'eval':scheme.eval.Exec,
+        'last':last,
         'display': lambda x, port=sys.stdout: port.write(x.replace('~n', '\n') if isa(x, (str, unicode)) else str(x))})
     from repl import repl
     repl(open(__file__.rsplit('/',1)[0]+'/builtins.scm'),'',None)

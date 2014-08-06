@@ -17,7 +17,8 @@ class IF(object):
         if_false = params[2] if len(params) == 3 else False
         env = processer.cenv
         if isinstance(conditional, list):
-            if processer.process([conditional], env):
+            ret = processer.process([conditional], env)
+            if ret:
                 processer.stackPointer-=1
                 return if_true
             else:

@@ -12,10 +12,13 @@ from scheme.utils import deepcopy
 from zope.interface import providedBy
 from scheme.symbol import Symbol
 from Queue import LifoQueue, Empty
+from scheme import debug
 
+callStack = LifoQueue()
 
 class Processer:
-    def __init__(self):
+    def __init__(self, parent=None):
+        self.parent=parent
         self.callStack = LifoQueue()
         self.callDepth = 0
         self.env = Globals.Globals
@@ -24,37 +27,47 @@ class Processer:
         self.cenv = None
         self.initialCallDepth = 0
     def getContinuation(self):
-        return dict(env=self.cenv, callDepth=self.callDepth, callStack=deepcopy(self.callStack.queue),
+        if self.parent:
+            pc = self.parent.continuation
+        else:
+            pc=dict(callDepth=0, callStack=[])
+        return dict(env=self.cenv, callDepth=self.callDepth+pc['callDepth'], callStack=deepcopy(self.callStack.queue)+pc['callStack'],
                     initialCallDepth=self.initialCallDepth, stackPointer=self.stackPointer)
     def setContinuation(self, (continuation, retval)):
-
         self.callStack.queue[:] = continuation['callStack']
         self.callDepth = continuation['callDepth']
         self.cenv = continuation['env']
         self.stackPointer = continuation['stackPointer']
         self.popStack(retval)
-
     continuation = property(getContinuation, setContinuation)
     def pushStack(self, ast):
-
         self.callStack.put((self.ast, self.cenv, self.stackPointer))
         self.ast = ast
         self.cenv = Environment(self.cenv)
         self.stackPointer = 0
         self.callDepth += 1
     def popStack(self, retval):
-
         self.ast, self.cenv, self.stackPointer = self.callStack.get_nowait()
         self.callDepth -= 1
         self.ast[self.stackPointer] = retval
     def dumpStack(self):
-        while self.callDepth > 0:
+        while self.callDepth > 0 and self.callStack.queue:
             self.popStack(None)
         self.stackPointer=0
         self.cenv=None
         self.initialCallDepth=0
         self.ast=None
         self.callDepth=0
+    def _process(self, _ast, env=None, callDepth=None):
+        try:
+            return self.process(_ast, env, callDepth)
+        except Empty as e:
+            if ('cont' in dir(e)):
+                continuation = e.cont
+                retval=e.ret
+                self.setContinuation([continuation, retval])
+                return self._process(processer.ast, processer.cenv, 1)
+            raise e
     def process(self, _ast, env=None, callDepth=None):
 
         if _ast==[[]]:
@@ -172,6 +185,10 @@ class Processer:
                         r1 = [lambda *x: r]
                         self.ast[:] = r1
                     else:
+                        if debug.DEBUG:
+                            e=Exception()
+                            e.r=r
+                            raise e
                         self.ast[:] = r
                     self.initialCallDepth = initial_call_depth
                     continue
@@ -179,9 +196,12 @@ class Processer:
                     self.ast[self.stackPointer] = this.toObject(self.cenv)
 
                 self.stackPointer += 1
-        except Empty:
-            #print "Rising from call/cc or macro"
+        except Empty as e:
+            if 'ret' in dir(e):
+                return e.ret
             return self.ast[-1]
+            raise e
+
 
 
 

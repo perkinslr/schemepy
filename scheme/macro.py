@@ -56,7 +56,6 @@ class SimpleMacro(object):
         env = Environment(self.env)
         if (isinstance(self.ast[0], list)):
             #if len(self.ast[0])==1:
-            #    print 42
             #    env[self.ast[0][0]] = [Symbol('quote'), args]
             if '.' in self.ast[0]:
                 idx = 0

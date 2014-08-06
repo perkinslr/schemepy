@@ -41,3 +41,11 @@ class Symbol(unicode):
         if debug.DEBUG:
             return '<Symbol %s>' % self
         return str(self)
+    def __bool__(self):
+        if self.isBound(None):
+            return bool(self.toObject(Globals))
+        return True
+    def __add__(self, other):
+        if (isinstance(other, Symbol)):
+            return self.toObject(Globals)+other.toObject(Globals)
+        return str(self)+other

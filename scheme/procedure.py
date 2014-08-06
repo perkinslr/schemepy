@@ -32,7 +32,7 @@ class SimpleProcedure(object):
                 for idx, item in enumerate(self.ast[0][:-2]):
                     i = args[idx]
                     env[item] = i
-                env[self.ast[0][-1]] = args[idx+1:]
+                env[self.ast[0][-1]] = args[idx:]
             else:
                 if (len(args) != len(self.ast[0])):
                     raise TypeError("%r expected exactly %i arguments, got %i" %(self, len(self.ast[0]), len(args)))
@@ -41,10 +41,8 @@ class SimpleProcedure(object):
                     env[item] = i
         else:
             env[self.ast[0]] = args
-        if debug.DEBUG:
-            print env
         for i in self.ast[1:]:
-            retval = processer.process(deepcopy([i]), env)
+            retval = processer.__class__(processer).process(deepcopy([i]), env)
         if (isinstance(retval, Symbol)):
             return retval.toObject(env)
         return retval

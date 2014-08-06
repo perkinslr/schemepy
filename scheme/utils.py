@@ -1,7 +1,15 @@
+from scheme.environment import Environment
 from scheme.symbol import Symbol
 
 
 def deepcopy(lst):
+    if isinstance(lst, dict) and not isinstance(lst, Environment):
+        d={}
+        for i in lst:
+            d[i]=deepcopy(lst[i])
+        return d
+    if isinstance(lst, tuple):
+        lst=list(lst)
     if not isinstance(lst, list):
         return lst
     o = []
@@ -47,24 +55,19 @@ def copy_with_quasiquote(processer, env, lst, lastlst = None, lastidx = None, os
                 retval = processer.process([qqtarget], env)
                 return retval, True
             if lst == ',':
-                #print 48
                 qqtarget=lastlst.pop(lastidx+1)
-                #print qqtarget
-                retval = processer.process([qqtarget], env)
-                #print 52, retval
+                retval = processer.__class__(processer).process([qqtarget], env)
                 return retval, False
             if lastidx == 0 and lst.isBound(Globals) and isinstance(lst.toObject(Globals), unquotesplicing):
 
                 qqtarget=lastlst.pop(lastidx+1)
-                retval = processer.process([qqtarget], env)
+                retval = processer.__class__(processer).process([qqtarget], env)
                 ostack.extend(retval)
                 return retval, 2
             if lst == ',@':
-
                 qqtarget=lastlst.pop(lastidx+1)
 
-
-                retval = processer.process([qqtarget], env)
+                retval = processer.__class__(processer).process([qqtarget], env)
                 return retval, 3
             return MacroSymbol(lst).setEnv({lst: lst}), False
         return lst, False

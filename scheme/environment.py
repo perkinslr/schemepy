@@ -13,6 +13,4 @@ class Environment(dict):
     def __call__(self, item):
         return self[item]
     def __setitem__(self, key, value):
-        if DEBUG:
-            print "Setting %r to %r" % (key, value)
         dict.__setitem__(self, key, value)

@@ -1,3 +1,6 @@
+from Queue import Empty
+
+
 __author__ = 'perkins'
 
 
@@ -13,7 +16,10 @@ def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
         sys.stdout.write(prompt)
         ast = parser.ast
         if ast:
-            r = processer.process(ast)
+            try:
+                r = processer._process(ast)
+            except Empty as e:
+                r = e.ret
             if r is not None and of:
                 print >> of, r
         else:

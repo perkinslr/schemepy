@@ -1,3 +1,6 @@
+from scheme.symbol import Symbol
+
+
 __author__ = 'jeanie'
 
 from scheme.Globals import Globals
@@ -10,13 +13,11 @@ class begin(object):
     def __init__(self):
         pass
     def __call__(self, processer, params):
-        env = processer.cenv
-        #for param in params[:-1]:
-        #    processer.process(param, env)
-        for param in params[:-1]:
-            processer.process([param], env.parent)
-        ret = processer.process([params[-1]], env.parent)
-        processer.popStack(ret)
+        for param in params:
+
+            retval = processer.__class__(processer).process([param], processer.cenv.parent)
+
+        processer.popStack(retval)
         processer.stackPointer+=1
         return
 
