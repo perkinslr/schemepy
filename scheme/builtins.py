@@ -1,8 +1,9 @@
+from __future__ import division
+
 import sys
 import math
 import cmath
 import operator as op
-
 from scheme.Globals import Globals
 
 
@@ -28,7 +29,7 @@ def add_globals(self):
         'Exception': Exception,
         'type': type,
         '**': op.pow,
-        '+': op.add, '-': op.sub, '*': op.mul, '/': op.div, 'not': op.not_,
+        '+': op.add, '-': op.sub, '*': op.mul, '/': op.itruediv, 'not': op.not_,
         '>': op.gt, '<': op.lt, '>=': op.ge, '<=': op.le, '=': op.eq,
         'equal?': op.eq, 'eq?': op.is_, 'length': len, 'cons': cons,
         'car': lambda x: x[0],

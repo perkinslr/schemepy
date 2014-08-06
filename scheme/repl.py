@@ -20,6 +20,8 @@ def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
                 r = processer._process(ast)
             except Empty as e:
                 r = e.ret
+            except Exception as e:
+                r=e
             if r is not None and of:
                 print >> of, r
         else:

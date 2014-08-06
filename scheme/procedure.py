@@ -29,10 +29,11 @@ class SimpleProcedure(object):
         if (isinstance(self.ast[0], list)):
             if '.' in self.ast[0]:
                 idx = 0
+                iterargs = iter(args)
                 for idx, item in enumerate(self.ast[0][:-2]):
-                    i = args[idx]
+                    i = iterargs.next()
                     env[item] = i
-                env[self.ast[0][-1]] = args[idx:]
+                env[self.ast[0][-1]] = list(iterargs)
             else:
                 if (len(args) != len(self.ast[0])):
                     raise TypeError("%r expected exactly %i arguments, got %i" %(self, len(self.ast[0]), len(args)))

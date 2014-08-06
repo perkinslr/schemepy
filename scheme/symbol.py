@@ -45,7 +45,13 @@ class Symbol(unicode):
         if self.isBound(None):
             return bool(self.toObject(Globals))
         return True
+    def __eq__(self, other):
+        if not isinstance(other, (unicode, str)) and self.isBound(Globals):
+            return self.toObject(Globals)==other
+        return unicode.__eq__(self, other)
     def __add__(self, other):
         if (isinstance(other, Symbol)):
             return self.toObject(Globals)+other.toObject(Globals)
+        if self.isBound(None):
+            return self.toObject(None)+other
         return str(self)+other

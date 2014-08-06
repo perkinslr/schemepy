@@ -113,6 +113,28 @@ class Processer:
                 else:
                     return this
             while True:
+                if (isinstance(self.ast, list)):
+                    for idx, this in enumerate(self.ast):
+                        if this == "'":
+                            quoteTarget=self.ast.pop(idx+1)
+                            if quoteTarget=="'":
+                                def getQuoteTarget():
+                                    qt = self.ast.pop(idx+1)
+                                    if qt == "'":
+                                        return [Symbol('quote'), getQuoteTarget()]
+                                    return qt
+                                quoteTarget=[Symbol('quote'), getQuoteTarget()]
+                            self.ast[idx]=[Symbol('quote'), quoteTarget]
+                        elif this == "`":
+                            quoteTarget=self.ast.pop(idx+1)
+                            if quoteTarget=="`":
+                                def getQuoteTarget():
+                                    qt = self.ast.pop(idx+1)
+                                    if qt == "`":
+                                        return [Symbol('quasiquote'), getQuoteTarget()]
+                                    return qt
+                                quoteTarget=[Symbol('quasiquote'), getQuoteTarget()]
+                            self.ast[idx]=[Symbol('quasiquote'), quoteTarget]
                 if self.stackPointer >= len(self.ast) and self.callDepth <= self.initialCallDepth:
                     return self.ast[-1]
                 if self.stackPointer >= len(self.ast):

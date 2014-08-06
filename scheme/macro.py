@@ -48,6 +48,7 @@ class SimpleMacro(object):
         self.wrapped=wrapped
     # noinspection PyUnusedLocal
     def __call__(self, processer, args):
+        print args
         if self.wrapped:
             if Procedure in providedBy(self.wrapped):
                 return self.wrapped(processer, args)
