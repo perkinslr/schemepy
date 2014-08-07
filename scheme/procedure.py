@@ -44,7 +44,7 @@ class SimpleProcedure(object):
             env[self.ast[0]] = args
         for i in self.ast[1:]:
             retval = processer.__class__(processer).process(deepcopy([i]), env)
-        if (isinstance(retval, Symbol)):
+        if (isinstance(retval, Symbol)) and retval.isBound(env):
             return retval.toObject(env)
         return retval
     def setName(self, name):

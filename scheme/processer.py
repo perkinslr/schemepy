@@ -1,6 +1,7 @@
 import sys
 
 from scheme import Globals
+from scheme.utils import callCCBounce
 
 
 sys.path.extend('/home/perkins/pycharm')
@@ -8,7 +9,7 @@ sys.path.extend('/home/perkins/pycharm')
 from scheme.environment import Environment
 from scheme.procedure import Procedure
 from scheme.macro import Macro
-from scheme.utils import deepcopy
+from scheme.utils import deepcopy, expand_quotes
 from zope.interface import providedBy
 from scheme.symbol import Symbol
 from Queue import LifoQueue, Empty
@@ -16,9 +17,14 @@ from scheme import debug
 
 callStack = LifoQueue()
 
+current_processer = None
+
 class Processer:
     def __init__(self, parent=None):
+        self.children=[]
         self.parent=parent
+        if parent:
+            parent.children.append(self)
         self.callStack = LifoQueue()
         self.callDepth = 0
         self.env = Globals.Globals
@@ -34,12 +40,18 @@ class Processer:
         return dict(env=self.cenv, callDepth=self.callDepth+pc['callDepth'], callStack=deepcopy(self.callStack.queue)+pc['callStack'],
                     initialCallDepth=self.initialCallDepth, stackPointer=self.stackPointer)
     def setContinuation(self, (continuation, retval)):
-        self.callStack.queue[:] = continuation['callStack']
+        self.callStack.queue[:] = deepcopy(continuation['callStack'])
         self.callDepth = continuation['callDepth']
         self.cenv = continuation['env']
         self.stackPointer = continuation['stackPointer']
         self.popStack(retval)
     continuation = property(getContinuation, setContinuation)
+    def pushStackN(self):
+        self.callStack.put((self.ast, self.cenv, self.stackPointer))
+        self.callDepth += 1
+    def popStackN(self):
+        self.ast, self.cenv, self.stackPointer = self.callStack.get_nowait()
+        self.callDepth -= 1
     def pushStack(self, ast):
         self.callStack.put((self.ast, self.cenv, self.stackPointer))
         self.ast = ast
@@ -52,7 +64,7 @@ class Processer:
         self.ast[self.stackPointer] = retval
     def dumpStack(self):
         while self.callDepth > 0 and self.callStack.queue:
-            self.popStack(None)
+            self.popStackN()
         self.stackPointer=0
         self.cenv=None
         self.initialCallDepth=0
@@ -61,6 +73,8 @@ class Processer:
     def _process(self, _ast, env=None, callDepth=None):
         try:
             return self.process(_ast, env, callDepth)
+        except callCCBounce as e:
+            return e.ret
         except Empty as e:
             if ('cont' in dir(e)):
                 continuation = e.cont
@@ -69,7 +83,8 @@ class Processer:
                 return self._process(processer.ast, processer.cenv, 1)
             raise e
     def process(self, _ast, env=None, callDepth=None):
-
+        global current_processer
+        current_processer = self
         if _ast==[[]]:
             raise SyntaxError()
         """
@@ -80,6 +95,8 @@ class Processer:
         :param env: Environment
         :return:
         """
+
+
         try:
             if callDepth is not None:
 
@@ -93,6 +110,7 @@ class Processer:
             else:
                 self.cenv = env
             self.ast = _ast
+            self.ast=expand_quotes(self.ast)
             self.stackPointer = 0;
             if not isinstance(self.ast, list):
                 if isinstance(self.ast, Symbol):
@@ -113,33 +131,11 @@ class Processer:
                 else:
                     return this
             while True:
-                if (isinstance(self.ast, list)):
-                    for idx, this in enumerate(self.ast):
-                        if this == "'":
-                            quoteTarget=self.ast.pop(idx+1)
-                            if quoteTarget=="'":
-                                def getQuoteTarget():
-                                    qt = self.ast.pop(idx+1)
-                                    if qt == "'":
-                                        return [Symbol('quote'), getQuoteTarget()]
-                                    return qt
-                                quoteTarget=[Symbol('quote'), getQuoteTarget()]
-                            self.ast[idx]=[Symbol('quote'), quoteTarget]
-                        elif this == "`":
-                            quoteTarget=self.ast.pop(idx+1)
-                            if quoteTarget=="`":
-                                def getQuoteTarget():
-                                    qt = self.ast.pop(idx+1)
-                                    if qt == "`":
-                                        return [Symbol('quasiquote'), getQuoteTarget()]
-                                    return qt
-                                quoteTarget=[Symbol('quasiquote'), getQuoteTarget()]
-                            self.ast[idx]=[Symbol('quasiquote'), quoteTarget]
                 if self.stackPointer >= len(self.ast) and self.callDepth <= self.initialCallDepth:
                     return self.ast[-1]
                 if self.stackPointer >= len(self.ast):
                     for idx, i in enumerate(self.ast):
-                        if isinstance(i, Symbol):
+                        if isinstance(i, Symbol) and i.isBound(self.cenv):
                             self.ast[idx]=i.toObject(self.cenv)
                     initial_call_depth = self.initialCallDepth
                     if isinstance(self.ast[0], Symbol):
@@ -153,41 +149,6 @@ class Processer:
                     self.stackPointer+=1
                     continue
                 this = self.ast[self.stackPointer]
-                if this == "'":
-                    quoteTarget=self.ast.pop(self.stackPointer+1)
-                    if quoteTarget=="'":
-                        def getQuoteTarget():
-                            qt = self.ast.pop(self.stackPointer+1)
-                            if qt == "'":
-                                return [Symbol('quote'), getQuoteTarget()]
-                            return qt
-                        quoteTarget=[Symbol('quote'), getQuoteTarget()]
-                    self.ast[self.stackPointer]=[Symbol('quote'), quoteTarget]
-                    continue
-                elif this == "`":
-
-                    quoteTarget=self.ast.pop(self.stackPointer+1)
-                    if quoteTarget=="`":
-                        def getQuoteTarget():
-                            qt = self.ast.pop(self.stackPointer+1)
-                            if qt == "`":
-                                return [Symbol('quasiquote'), getQuoteTarget()]
-                            return qt
-                        quoteTarget=[Symbol('quasiquote'), getQuoteTarget()]
-                    self.ast[self.stackPointer]=[Symbol('quasiquote'), quoteTarget]
-
-                    continue
-                elif this == ",":
-                    quoteTarget=self.ast.pop(self.stackPointer+1)
-                    if quoteTarget==",":
-                        def getQuoteTarget():
-                            qt = self.ast.pop(self.stackPointer+1)
-                            if qt == ",":
-                                return [Symbol('unquote'), getQuoteTarget()]
-                            return qt
-                        quoteTarget=[Symbol('unquote'), getQuoteTarget()]
-                    self.ast[self.stackPointer]=[Symbol('unquote'), quoteTarget]
-                    continue
                 if isinstance(this, list):
                     self.pushStack(this)
                     continue
@@ -207,10 +168,6 @@ class Processer:
                         r1 = [lambda *x: r]
                         self.ast[:] = r1
                     else:
-                        if debug.DEBUG:
-                            e=Exception()
-                            e.r=r
-                            raise e
                         self.ast[:] = r
                     self.initialCallDepth = initial_call_depth
                     continue

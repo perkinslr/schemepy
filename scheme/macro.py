@@ -1,4 +1,5 @@
 from zope.interface import providedBy
+from scheme.debug import LOG
 from scheme.environment import Environment
 from scheme.procedure import Procedure
 from scheme.utils import copy_with_replacement
@@ -74,7 +75,9 @@ class SimpleMacro(object):
         else:
             env[self.ast[0]] = [Symbol('quote'), args]
         retval = copy_with_replacement(self.ast[1:], **env)
+        LOG(77,retval)
         retval = processer.process(retval, processer.cenv)
+        LOG(80,retval)
         processer.popStack(retval)
         return
     def setName(self, name):

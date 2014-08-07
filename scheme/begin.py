@@ -13,8 +13,8 @@ class begin(object):
     def __init__(self):
         pass
     def __call__(self, processer, params):
+        env=processer.cenv.parent
         for param in params:
-
             retval = processer.__class__(processer).process([param], processer.cenv.parent)
 
         processer.popStack(retval)

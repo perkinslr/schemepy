@@ -1,4 +1,5 @@
 from Queue import Empty
+from scheme import debug
 
 
 __author__ = 'perkins'
@@ -14,13 +15,23 @@ def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
     parser = Parser(f)
     while True:
         sys.stdout.write(prompt)
-        ast = parser.ast
+        try:
+            ast = parser.ast
+        except Exception as e:
+            print e
+            continue
         if ast:
             try:
                 r = processer._process(ast)
             except Empty as e:
                 r = e.ret
             except Exception as e:
+                if debug.DEBUG:
+                    import traceback
+                    print traceback.format_exc()
+                    print processer.ast
+                    print processer.children[-1].ast
+                    print scheme.processer.current_processer.ast
                 r=e
             if r is not None and of:
                 print >> of, r

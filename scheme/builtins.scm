@@ -1,28 +1,17 @@
 (begin
-    (define (for-each callable lst)
-        (callable (car lst)) (for-each callable (cdr lst)))
+    (define (for-each callable lst)                                                      
+        (define ret (callable (car lst)))
+        (if (cdr lst) (for-each callable (cdr lst)) ret))
     
-    (define (andl params)
-        
-        
-        (if (null? params) 
-            #t
-            (if (bool (car params) )
-                (if (= 1 (len? params)) 
-                    (car params) 
-                    (andl (cdr params)))
-                (car params))))
-
-    (define (and . params)
-        
-        (andl params))
+    (define-macro and (lambda args 
+        (if (null? args) #t
+            (if (= (length args) 1) (car args)
+                `(if ,(car args) (and ,@(cdr args)) #f)))))
     
     (define (newline) (display "~n"))
     
     (define-macro (+= var val) (set! var (+ var val)))
     
     (define-macro (++ var) (+= var 1))
-    (display 28)
     (newline)
-    (display and)
 )

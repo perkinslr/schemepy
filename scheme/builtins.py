@@ -4,8 +4,20 @@ import sys
 import math
 import cmath
 import operator as op
+from zope.interface import providedBy
+from scheme import debug
 from scheme.Globals import Globals
+from scheme.procedure import Procedure
 
+conts=[None]
+def setcont(cont):
+    conts[0]=cont
+
+def getcont():
+    return conts[0]
+
+def setDebug(b):
+    debug.DEBUG=b
 
 cons = lambda x, y: [x] + y
 
@@ -25,6 +37,11 @@ def add_globals(self):
     self.update(vars(math))
     self.update(vars(cmath))
     self.update({
+        'getcont':getcont,
+        'setcont':setcont,
+        '%':op.mod,
+        'procedure?':lambda x:Procedure in providedBy(x),
+        'set-debug':setDebug,
         'throw': throw,
         'Exception': Exception,
         'type': type,

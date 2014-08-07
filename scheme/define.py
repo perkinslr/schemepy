@@ -13,7 +13,9 @@ class define(object):
         if not isinstance(params[0], list):
             env = processer.cenv.parent
             name = params[0]
+            processer.pushStack(params[1:])
             value = processer.process(params[1:], env)
+            processer.popStack(value)
             env[name] = value
         else:
             name = params[0][0]

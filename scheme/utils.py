@@ -1,6 +1,6 @@
 from scheme.environment import Environment
 from scheme.symbol import Symbol
-
+class callCCBounce(Exception): pass
 
 def deepcopy(lst):
     if isinstance(lst, dict) and not isinstance(lst, Environment):
@@ -95,3 +95,30 @@ def symbols_to_values(lst, env):
     for i in lst:
         o.append(symbols_to_values(i, env))
     return o
+
+
+def expand_quotes(lst):
+    for idx, this in enumerate(lst):
+        if this == "'":
+            quoteTarget=lst.pop(idx+1)
+            if quoteTarget=="'":
+                def getQuoteTarget():
+                    qt = lst.pop(idx+1)
+                    if qt == "'":
+                        return [Symbol('quote'), getQuoteTarget()]
+                    return qt
+                quoteTarget=[Symbol('quote'), getQuoteTarget()]
+            lst[idx]=[Symbol('quote'), quoteTarget]
+        elif this == "`":
+            quoteTarget=lst.pop(idx+1)
+            if quoteTarget=="`":
+                def getQuoteTarget():
+                    qt = lst.pop(idx+1)
+                    if qt == "`":
+                        return [Symbol('quasiquote'), getQuoteTarget()]
+                    return qt
+                quoteTarget=[Symbol('quasiquote'), getQuoteTarget()]
+            lst[idx]=[Symbol('quasiquote'), quoteTarget]
+        elif isinstance(this, list):
+            expand_quotes(this)
+    return lst

@@ -1,9 +1,9 @@
 from Queue import Empty
-from zope.interface import implements
+from zope.interface import implements, providedBy
 
 from scheme.procedure import Procedure
 from scheme.processer import Globals, processer as p
-from scheme.utils import deepcopy
+from scheme.utils import deepcopy, callCCBounce
 
 
 class callcc():
@@ -25,7 +25,16 @@ class callccCallback():
         self.env = Globals
         self.continuation = continuation
     def __call__(self, processer, ast):
-        global c
+        p.dumpStack()
+        processer.dumpStack()
+        processer.setContinuation([self.continuation,ast[0]])
+        e=callCCBounce()
+        e.ret=processer.process(processer.ast, processer.cenv, 0)
+        processer.dumpStack
+        raise e
+
+
+        '''global c
         c=deepcopy(self.continuation['callStack'])
         p1 = processer.__class__()
         p1.setContinuation([self.continuation, ast[0]])
@@ -33,10 +42,7 @@ class callccCallback():
         processer.dumpStack()
         p.dumpStack()
         p.ast=[ret]
-        processer.ast=[ret]
-        e=Empty()
-        e.ret=ret
-        raise e
+        processer.ast=[ret]'''
 
 
 Globals.Globals['call/cc'] = callcc()
