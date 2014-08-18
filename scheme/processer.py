@@ -1,26 +1,20 @@
-import sys
-
 from scheme import Globals
 from scheme.utils import callCCBounce
-
-
-sys.path.extend('/home/perkins/pycharm')
-
 from scheme.environment import Environment
-from scheme.procedure import Procedure
-from scheme.macro import Macro
+from scheme.procedure import Procedure, SimpleProcedure
+from scheme.macro import Macro, MacroSymbol
 from scheme.utils import deepcopy, expand_quotes
 from zope.interface import providedBy
 from scheme.symbol import Symbol
 from Queue import LifoQueue, Empty
 from scheme import debug
 
-callStack = LifoQueue()
-
 current_processer = None
-
+discarded_frames=[]
 class Processer:
     def __init__(self, parent=None):
+#        if current_processer:
+#            raise Exception()
         self.children=[]
         self.parent=parent
         if parent:
@@ -36,9 +30,9 @@ class Processer:
         if self.parent:
             pc = self.parent.continuation
         else:
-            pc=dict(callDepth=0, callStack=[])
+            pc=dict(callDepth=0, callStack=[], initialCallDepth=0)
         return dict(env=self.cenv, callDepth=self.callDepth+pc['callDepth'], callStack=deepcopy(self.callStack.queue)+pc['callStack'],
-                    initialCallDepth=self.initialCallDepth, stackPointer=self.stackPointer)
+                    initialCallDepth=self.initialCallDepth+pc['initialCallDepth'], stackPointer=self.stackPointer)
     def setContinuation(self, (continuation, retval)):
         self.callStack.queue[:] = deepcopy(continuation['callStack'])
         self.callDepth = continuation['callDepth']
@@ -47,21 +41,26 @@ class Processer:
         self.popStack(retval)
     continuation = property(getContinuation, setContinuation)
     def pushStackN(self):
-        self.callStack.put((self.ast, self.cenv, self.stackPointer))
+        self.callStack.put((self.ast, self.cenv, self.stackPointer, 0))
         self.callDepth += 1
     def popStackN(self):
-        self.ast, self.cenv, self.stackPointer = self.callStack.get_nowait()
+        self.ast, self.cenv, self.stackPointer, garbage = self.callStack.get_nowait()
         self.callDepth -= 1
     def pushStack(self, ast):
-        self.callStack.put((self.ast, self.cenv, self.stackPointer))
+        self.callStack.put((self.ast, self.cenv, self.stackPointer, 1))
         self.ast = ast
         self.cenv = Environment(self.cenv)
         self.stackPointer = 0
         self.callDepth += 1
     def popStack(self, retval):
-        self.ast, self.cenv, self.stackPointer = self.callStack.get_nowait()
+        if isinstance(retval, Symbol):
+            retval=MacroSymbol(retval).setEnv({retval:retval.toObject(self.cenv)})
+        if debug.DEBUG:
+            discarded_frames.append((self.ast, self.cenv, self.stackPointer))
+        self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
         self.callDepth -= 1
-        self.ast[self.stackPointer] = retval
+        if rv:
+           self.ast[self.stackPointer] = retval
     def dumpStack(self):
         while self.callDepth > 0 and self.callStack.queue:
             self.popStackN()
@@ -95,11 +94,8 @@ class Processer:
         :param env: Environment
         :return:
         """
-
-
         try:
             if callDepth is not None:
-
                 self.initialCallDepth = callDepth
             else:
 
@@ -140,7 +136,40 @@ class Processer:
                     initial_call_depth = self.initialCallDepth
                     if isinstance(self.ast[0], Symbol):
                         self.ast[0] = self.ast[0].toObject(self.cenv)
-                    if Procedure in providedBy(self.ast[0]):
+                    if isinstance(self.ast[0], SimpleProcedure):
+                        this=self.ast[0]
+                        args=self.ast[1:]
+                        params=deepcopy(this.ast[0])
+                        e = Environment(this.env)
+                        print 148, params, args
+                        if isinstance(params, list):
+                            if '.' in params:
+                                iterargs = iter(args)
+                                for idx, item in enumerate(params[:-2]):
+                                    e[item] = iterargs.next()
+                                e[params[-1]] = list(iterargs)
+                            else:
+                                print self.ast
+                                print args
+                                if (isinstance(args, list) and len(args) != len(params)):
+                                    raise TypeError("%r expected exactly %i arguments, got %i" % (
+                                        self, len(self.ast[0]), len(args)))
+                                if (not isinstance(args, list) and 1 != len(params)):
+                                    raise TypeError("%r expected exactly %i arguments, got %i" % (
+                                        self, len(self.ast[0]), 1))
+                                iterargs = iter(args)
+                                for idx, item in enumerate(params):
+                                    e[item] = iterargs.next()
+                        else:
+                            e[params] = args
+                        print 161, self.ast
+                        self.popStackN()
+                        print 163, self.ast
+                        self.pushStack(deepcopy([Symbol('last'), [Symbol('list')] + this.ast[1:]]))
+                        print 162, self.ast, e
+                        self.cenv = Environment(e)
+                        continue
+                    elif Procedure in providedBy(self.ast[0]):
                         self.popStack(self.ast[0](self, self.ast[1:]))
                     else:
                         r = self.ast[0](*self.ast[1:])
@@ -173,7 +202,6 @@ class Processer:
                     continue
                 if isinstance(this, Symbol) and this.isBound(self.cenv):
                     self.ast[self.stackPointer] = this.toObject(self.cenv)
-
                 self.stackPointer += 1
         except Empty as e:
             if 'ret' in dir(e):

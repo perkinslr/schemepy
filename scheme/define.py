@@ -50,10 +50,12 @@ class Set(object):
     def __init__(self):
         pass
     def __call__(self, processer, params):
-        env = processer.cenv.parent
         if not isinstance(params[0], list):
+            env = processer.cenv.parent
             name = params[0]
+            processer.pushStack(params[1:])
             value = processer.process(params[1:], env)
+            processer.popStack(value)
             if not name.isBound(env):
                 raise NameError("Name %s unbound in enclosing namespaces" % name)
             name.getEnv(env)[name] = value
@@ -61,14 +63,34 @@ class Set(object):
             name = params[0][0]
             args = params[0][1:]
             rest = params[1:]
-            if not name.isBound(env):
-                raise NameError("Name %s unbound in enclosing namespaces" % name)
-            name.getEnv(env)[name] = SimpleProcedure([args] + rest, processer.cenv.parent).setName(name)
-        #processer.ast[processer.stackPointer]=None
-        processer.popStack(None)
-        processer.stackPointer+=1
-        return None
+            env = processer.cenv.parent if processer.cenv is not Globals.Globals else Globals.Globals
+            if isinstance(name, list):
+                from scheme.Lambda import Lambda
 
+
+                l = Lambda()
+                x = name
+                o = []
+                while isinstance(x, list):
+                    o.append(x)
+                    x = x[0]
+                name = x
+                if not name.isBound(env):
+                    raise NameError("Name %s unbound in enclosing namespaces" % name)
+                retval = []
+                retval.append(Symbol('define'))
+
+                retval.append(o[-1])
+                retval.append([Symbol('lambda'), args, [Symbol('begin')] + rest])
+                processer.process(retval, env)
+            else:
+                if not name.isBound(env):
+                    raise NameError("Name %s unbound in enclosing namespaces" % name)
+                env[name] = SimpleProcedure([args] + rest, env).setName(name)
+        processer.popStack(None)
+        # processer.ast[processer.stackPointer]=None
+        processer.stackPointer += 1
+        return None
 
 class defmacro(object):
     implements(Macro)

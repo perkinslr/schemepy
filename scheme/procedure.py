@@ -43,7 +43,9 @@ class SimpleProcedure(object):
         else:
             env[self.ast[0]] = args
         for i in self.ast[1:]:
-            retval = processer.__class__(processer).process(deepcopy([i]), env)
+            processer.pushStackN()
+            retval = processer.process(deepcopy([i]), env)
+            processer.popStackN()
         if (isinstance(retval, Symbol)) and retval.isBound(env):
             return retval.toObject(env)
         return retval

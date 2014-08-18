@@ -12,6 +12,7 @@ from scheme.procedure import Procedure
 conts=[None]
 def setcont(cont):
     conts[0]=cont
+    return 1
 
 def getcont():
     return conts[0]
