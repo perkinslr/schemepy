@@ -54,6 +54,8 @@ class case(object):
         ret=[]
         for clause in clauses:
             if clause[0]=='else':
+                ret.extend(clause[1:])
+            else:
                 if isinstance(clause[0], list):
                     val = processer.process([clause[0]], processer.cenv)
                 else:

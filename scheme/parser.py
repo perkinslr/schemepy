@@ -15,13 +15,13 @@ class Parser(object):
         return cls(cStringIO.StringIO(string))
     def __init__(self, _file):
         self.file = _file;
-        self.line = ''
+        self.line = u''
     @property
     def tokens(self):
         """Return the next token, reading new text into line buffer if needed."""
         while True:
             if self.line=='\n' or self.line=='':
-                self.line = self.file.readline()
+                self.line = self.file.readline().decode('iso-8859-1')
             if self.line == '':
                 break
 

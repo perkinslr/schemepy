@@ -13,5 +13,10 @@
     (define-macro (+= var val) (set! var (+ var val)))
     
     (define-macro (++ var) (+= var 1))
-    (newline)
+
+
+    (define (print . args)
+	(for-each (lambda (x) (display x) (display " ")) args)
+	(display "~n"))
+	(define else #t)
 )

@@ -14,23 +14,18 @@ class callcc():
     def __call__(self, processer, ast):
         #raise Exception()
         continuation = processer.continuation
+        continuation['initialCallDepth']+=1
         callback = callccCallback(continuation)
         #processer.popStack([ast[0], callback])
         #processer.stackPointer-=1
-        print 21, providedBy(ast[0]), ast
         if Procedure in providedBy(ast[0]):
-            print 23, ast
             processer.pushStackN()
             r = processer.process([[ast[0], callback]], processer.cenv)
             processer.popStackN()
-            print 25, r
         elif Macro in providedBy(ast[0]):
-            print 24, ast
             r = ast[0](processer, [callback])
-            print 25, r
             processer.pushStackN()
             r = processer.process(r,processer.cenv)
-            print 28, r
             processer.popStackN()
         else:
             r = ast[0](callback)
@@ -51,7 +46,7 @@ class callccCallback():
         #if processer.callStack.queue:
          #   processer.callStack.queue[-1][2]=self.continuation['stackPointer']
         e=callCCBounce()
-        e.ret=processer.process(processer.ast, processer.cenv, max(processer.initialCallDepth, self.continuation['initialCallDepth']+1))
+        e.ret=processer.process(processer.ast, processer.cenv, max(processer.initialCallDepth, self.continuation['initialCallDepth']))
         processer.dumpStack()
         #p.dumpStack()
         raise e

@@ -30,7 +30,8 @@ def throw(e):
     raise e
 
 def last(o):
-    return o[-1]
+    if o:
+        return o[-1]
 
 def add_globals(self):
     """Add some Scheme standard procedures."""

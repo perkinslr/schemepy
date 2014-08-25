@@ -14,6 +14,7 @@ class begin(object):
         pass
     def __call__(self, processer, params):
         env=processer.cenv.parent
+        retval = None
         for param in params:
             processer.pushStackN()
             retval = processer.__class__(processer).process([param], env)

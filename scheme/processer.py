@@ -141,7 +141,6 @@ class Processer:
                         args=self.ast[1:]
                         params=deepcopy(this.ast[0])
                         e = Environment(this.env)
-                        print 148, params, args
                         if isinstance(params, list):
                             if '.' in params:
                                 iterargs = iter(args)
@@ -149,8 +148,6 @@ class Processer:
                                     e[item] = iterargs.next()
                                 e[params[-1]] = list(iterargs)
                             else:
-                                print self.ast
-                                print args
                                 if (isinstance(args, list) and len(args) != len(params)):
                                     raise TypeError("%r expected exactly %i arguments, got %i" % (
                                         self, len(self.ast[0]), len(args)))
@@ -162,11 +159,8 @@ class Processer:
                                     e[item] = iterargs.next()
                         else:
                             e[params] = args
-                        print 161, self.ast
                         self.popStackN()
-                        print 163, self.ast
                         self.pushStack(deepcopy([Symbol('last'), [Symbol('list')] + this.ast[1:]]))
-                        print 162, self.ast, e
                         self.cenv = Environment(e)
                         continue
                     elif Procedure in providedBy(self.ast[0]):
