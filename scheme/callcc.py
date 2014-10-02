@@ -46,7 +46,7 @@ class callccCallback():
         #if processer.callStack.queue:
          #   processer.callStack.queue[-1][2]=self.continuation['stackPointer']
         e=callCCBounce()
-        e.ret=processer.process(processer.ast, processer.cenv, max(processer.initialCallDepth, self.continuation['initialCallDepth']))
+        e.ret=processer.process(processer.ast, processer.cenv, max(processer.initialCallDepth, self.continuation['initialCallDepth']-1))
         processer.dumpStack()
         #p.dumpStack()
         raise e

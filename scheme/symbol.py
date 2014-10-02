@@ -1,9 +1,21 @@
 from scheme import debug
 from scheme.Globals import Globals
-
+import re
 
 class Symbol(unicode):
     def toObject(self, env):
+        if '.' in self and not self.replace('-','').replace('.','').replace('e','').isdigit() and not 'lambda:' in self:
+            print 8, self
+            lst = self.split('.')
+            val = Symbol(lst[0]).toObject(env)
+            for i in lst[1:]:
+                val = Symbol('getattr').toObject(env)(val, i)
+            return val
+        if '[' in self:
+            m = re.match('^(.+?)\[(.+?)\]$', self)
+            obj, key = m.groups()
+            val = Symbol('getitem').toObject(env)(Symbol(obj).toObject(env), Symbol(key).toObject(env))
+            return val
         while env is not None:
             if unicode(self) in env:
                 return env[self]
