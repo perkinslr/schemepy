@@ -6,7 +6,7 @@ class Symbol(unicode):
     def toObject(self, env):
         if self[0] == self[-1] == '"':
             return self[1:-1]
-        if '.' in self and not self.replace('-','').replace('.','').replace('e','').isdigit() and not 'lambda:' and not '.' == self in self:
+        if '.' in self and not self.replace('-','').replace('.','').replace('e','').isdigit() and not 'lambda:' in self and not '.' == self:
             lst = self.split('.')
             val = Symbol(lst[0]).toObject(env)
             for i in lst[1:]:
