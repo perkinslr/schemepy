@@ -4,8 +4,9 @@ import re
 
 class Symbol(unicode):
     def toObject(self, env):
-        if '.' in self and not self.replace('-','').replace('.','').replace('e','').isdigit() and not 'lambda:' in self:
-            print 8, self
+        if self[0] == self[-1] == '"':
+            return self[1:-1]
+        if '.' in self and not self.replace('-','').replace('.','').replace('e','').isdigit() and not 'lambda:' and not '.' == self in self:
             lst = self.split('.')
             val = Symbol(lst[0]).toObject(env)
             for i in lst[1:]:
@@ -24,8 +25,7 @@ class Symbol(unicode):
             return int(self)
         if self.replace('-','').replace('.', '').replace('e','').isdigit():
             return float(self)
-        if self[0] == self[-1] == '"':
-            return self[1:-1]
+
         if self == '#t':
             return True
         if self == '#f':

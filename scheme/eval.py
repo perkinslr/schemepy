@@ -19,7 +19,6 @@ def Eval(obj):
 def Exec(ast):
     try:
         ret = p._process(ast)
-        print 22, ret
     except Empty as e:
         ret = e.ret
     return ret
