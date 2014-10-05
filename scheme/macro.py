@@ -21,7 +21,12 @@ class Macro(interface.Interface):
 
 
 class MacroSymbol(Symbol):
+    def setObj(self, obj):
+        self.obj=obj
+        return self
     def toObject(self, env):
+        if 'obj' in dir(self):
+            return self.obj
         return Symbol.toObject(self, self.env)
     def setEnv(self, env):
         # noinspection PyAttributeOutsideInit
