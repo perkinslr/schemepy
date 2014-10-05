@@ -29,7 +29,7 @@
             (lambda (row)
             (output "<tr>")
             (for-each
-                (lambda (col) (output "<td>" col "</td>"))
+                (lambda (col) (output "<td>" (if (callable col) (col) col) "</td>"))
                 row)
             (output "</tr>"))
         the-list)
