@@ -19,4 +19,21 @@
 	(for-each (lambda (x) (display x) (display " ")) args)
 	(display "~n"))
 	(define else #t)
+
+    (define (build-table header the-list)
+        (output "<table>")
+        (for-each
+            (lambda (header) (output "<th>" header "</th>"))
+            header)
+        (for-each
+            (lambda (row)
+            (output "<tr>")
+            (for-each
+                (lambda (col) (output "<td>" col "</td>"))
+                row)
+            (output "</tr>"))
+        the-list)
+        (output "</table>"))
+
+
 )
