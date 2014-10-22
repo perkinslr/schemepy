@@ -3,7 +3,7 @@ import cStringIO
 import parser
 
 import processer
-
+import utils
 p=processer.processer
 
 def Eval(obj):
@@ -18,7 +18,7 @@ def Eval(obj):
 
 def Exec(ast):
     try:
-        ret = p._process(ast)
+        ret = p._process(utils.deepcopy(ast))
     except Empty as e:
         ret = e.ret
     return ret
