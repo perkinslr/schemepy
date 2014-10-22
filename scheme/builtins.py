@@ -46,7 +46,7 @@ def add_globals(self):
         'set-debug':setDebug,
         'throw': throw,
         'Exception': Exception,
-        'type': type,
+        'type': lambda x: type(x),
         '**': op.pow,
         '+': op.add, '-': op.sub, '*': op.mul, '/': op.itruediv, 'not': op.not_,
         '>': op.gt, '<': op.lt, '>=': op.ge, '<=': op.le, '=': op.eq,
