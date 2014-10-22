@@ -20,7 +20,10 @@ class Symbol(unicode):
         while env is not None:
             if unicode(self) in env:
                 return env[self]
-            env = env.parent
+            if 'parent' in dir(env):
+                env = env.parent
+            else:
+                env=None
         if self.lstrip('-').isdigit():
             return int(self)
         if self.replace('-','').replace('.', '').replace('e','').isdigit():
