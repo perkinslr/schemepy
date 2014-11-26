@@ -75,7 +75,7 @@ class Processer:
         except callCCBounce as e:
             return e.ret
         except Empty as e:
-            if ('cont' in dir(e)):
+            if hasattr(e, 'cont'):
                 continuation = e.cont
                 retval=e.ret
                 self.setContinuation([continuation, retval])
@@ -184,21 +184,20 @@ class Processer:
                 if self.stackPointer == 0 and Macro in providedBy(t):
                     initial_call_depth = self.initialCallDepth
                     r = t(self, self.ast[1:])
+                    self.initialCallDepth = initial_call_depth
                     if r is None:
-                        self.initialCallDepth = initial_call_depth
                         continue
                     if not isinstance(r, list):
                         r1 = [lambda *x: r]
                         self.ast[:] = r1
                     else:
                         self.ast[:] = r
-                    self.initialCallDepth = initial_call_depth
                     continue
                 if isinstance(this, Symbol) and this.isBound(self.cenv):
                     self.ast[self.stackPointer] = this.toObject(self.cenv)
                 self.stackPointer += 1
         except Empty as e:
-            if 'ret' in dir(e):
+            if hasattr(e, 'ret'):
                 return e.ret
             return self.ast[-1]
             raise e

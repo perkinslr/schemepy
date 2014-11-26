@@ -21,4 +21,4 @@ import quasiquote
 import unquote
 import unquotesplicing
 import let_aster
-from . import builtins
+import builtins

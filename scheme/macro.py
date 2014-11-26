@@ -26,7 +26,7 @@ class MacroSymbol(Symbol):
         return self
     def toObject(self, env):
         self.env.parent=env if env is not None else scheme.Globals.Globals
-        if 'obj' in dir(self):
+        if hasattr(self, 'obj'):
             return self.obj
         return Symbol.toObject(self, self.env)
     def setEnv(self, env):
