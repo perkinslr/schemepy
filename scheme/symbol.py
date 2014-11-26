@@ -1,17 +1,25 @@
+# cython: profile=True
+
 from scheme import debug
 from scheme.Globals import Globals
 import re
 
+
 class Symbol(unicode):
     def toObject(self, env):
+        if hasattr(self, 'cache'):
+            ret=self.cache
+            del(self.cache)
+            return ret
         if self[0] == self[-1] == '"':
             return self[1:-1]
-        if '.' in self and not self.replace('-','').replace('.','').replace('e','').isdigit() and not 'lambda:' in self and not '.' == self:
+        if '.' in self and (not self.replace('-','').replace('.','').replace('e','').isdigit() and not 'lambda:' in self and not '.' == self):
             lst = self.split('.')
             val = Symbol(lst[0]).toObject(env)
             for i in lst[1:]:
                 val = Symbol('getattr').toObject(env)(val, i)
             return val
+
         if '[' in self:
             m = re.match('^(.+?)\[(.+?)\]$', self)
             obj, key = m.groups()
@@ -20,7 +28,7 @@ class Symbol(unicode):
         while env is not None:
             if unicode(self) in env:
                 return env[self]
-            if 'parent' in dir(env):
+            if hasattr(env,'parent'):
                 env = env.parent
             else:
                 env=None
@@ -37,9 +45,23 @@ class Symbol(unicode):
             return complex(self.replace('i','j',1))
         except:
             raise NameError(u"Symbol '%s' undefined" % self)
-    def isBound(self, env):
+    def isBound(self, env, cache=True):
         try:
-            self.toObject(env)
+            if self.lstrip('-').isdigit():
+                return True
+            if self.replace('-','').replace('.', '').replace('e','').isdigit():
+                return True
+            if self == '#t':
+                return True
+            if self == '#f':
+                return True
+            try:
+                complex(self.replace('i','j',1))
+                return True
+            except:
+                pass
+            if cache:
+                self.cache=self.toObject(env)
             return True
         except NameError:
             return False
@@ -61,7 +83,7 @@ class Symbol(unicode):
             return bool(self.toObject(Globals))
         return True
     def __eq__(self, other):
-        if not isinstance(other, (unicode, str)) and self.isBound(Globals):
+        if not isinstance(other, (unicode, str)) and self.isBound(Globals, True):
             return self.toObject(Globals)==other
         return unicode.__eq__(self, other)
     def __add__(self, other):
@@ -70,3 +92,4 @@ class Symbol(unicode):
         if self.isBound(None):
             return self.toObject(None)+other
         return str(self)+other
+
