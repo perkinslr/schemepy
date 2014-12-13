@@ -17,7 +17,9 @@ class begin(object):
         retval = None
         for param in params:
             processer.pushStackN()
-            retval = processer.__class__(processer).process([param], env)
+            print 20, processer.callDepth, param, processer.ast
+            retval = processer.process([param], env, processer.callDepth)
+            print 21, retval
             processer.popStackN()
         processer.popStack(retval)
         processer.stackPointer+=1

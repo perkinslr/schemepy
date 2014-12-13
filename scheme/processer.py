@@ -47,12 +47,24 @@ class Processer:
         self.ast, self.cenv, self.stackPointer, garbage = self.callStack.get_nowait()
         self.callDepth -= 1
     def pushStack(self, ast):
+        if debug.DEBUG:
+            import traceback
+            traceback.print_stack()
+            print 'push', self.ast, self.stackPointer
         self.callStack.put((self.ast, self.cenv, self.stackPointer, 1))
         self.ast = ast
         self.cenv = Environment(self.cenv)
         self.stackPointer = 0
         self.callDepth += 1
     def popStack(self, retval):
+        if debug.DEBUG:
+            import traceback
+            traceback.print_stack()
+            print 'pop', self.ast, retval, self.stackPointer,
+            if len(self.callStack.queue):
+                print self.callStack.queue[-1][0], self.callStack.queue[-1][2]
+            print
+            print
         if isinstance(retval, Symbol):
             retval=MacroSymbol(retval).setEnv({retval:retval.toObject(self.cenv)})
         if debug.DEBUG:
@@ -61,6 +73,8 @@ class Processer:
         self.callDepth -= 1
         if rv:
            self.ast[self.stackPointer] = retval
+        if debug.DEBUG:
+            print self.ast
     def dumpStack(self):
         while self.callDepth > 0 and self.callStack.queue:
             self.popStackN()
@@ -122,7 +136,7 @@ class Processer:
                     this = self.ast[0].toObject(self.cenv)
                 else:
                     this = self.ast[0]
-                if self.callDepth:
+                if self.callDepth > self.initialCallDepth:
                     self.popStack(this)
                 else:
                     return this

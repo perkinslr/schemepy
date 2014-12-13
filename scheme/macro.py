@@ -20,18 +20,36 @@ class Macro(interface.Interface):
         """"""
 
 
+tstenv=[]
+
 class MacroSymbol(Symbol):
+    def getEnv(self, env):
+        if hasattr(self, 'env'):
+            return self.env
+        raise NameError("MacroSymbol has no associated environment")
     def setObj(self, obj):
         self.obj=obj
         return self
     def toObject(self, env):
-        self.env.parent=env if env is not None else scheme.Globals.Globals
+        tstenv.append([self, env])
+        #self.env.parent=env if env is not None else scheme.Globals.Globals
         if hasattr(self, 'obj'):
             return self.obj
+        e = env
+        while e is not None:
+            if e is self.env:
+                return Symbol.toObject(self, env)
+            if hasattr(e, 'parent'):
+                e = e.parent
+            else:
+                e=None
         return Symbol.toObject(self, self.env)
     def setEnv(self, env):
         # noinspection PyAttributeOutsideInit
-        self.env = Environment(None, env)
+        self.env = Environment(env)
+        if not hasattr(self.env.parent, 'parent'):
+            self.env.parent=Environment(scheme.Globals.Globals, env)
+        #self.env.parent = env.parent if env is not None and hasattr(env, 'parent') else scheme.Globals.Globals
         return self
 
 

@@ -37,5 +37,5 @@
         the-list)
         (output "</table>"))
 
-
+    (define define-syntax 'define)
 )

@@ -55,7 +55,12 @@ class Set(object):
             name = params[0]
             processer.pushStack(params[1:])
             value = processer.process(params[1:], env)
+            l = list(processer.callStack.queue[-1])
+            l[-1]=2
+            processer.callStack.queue[-1]=tuple(l)
             processer.popStack(value)
+            processer.ast[2]=value
+            processer.ast[0]=Symbol('set!')
             if not name.isBound(env):
                 raise NameError("Name %s unbound in enclosing namespaces" % name)
             name.getEnv(env)[name] = value

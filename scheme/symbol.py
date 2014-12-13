@@ -73,7 +73,7 @@ class Symbol(unicode):
         if self.lstrip('-').isdigit() or self.lstrip('-').replace('.', '').isdigit() or self[0] == self[-1] == '"' or \
                         self == '#t' or self == '#f':
             return Globals
-        raise NameError(u"Symbol '%s' undefined" % self)
+        raise NameError(u"Symbol '%s' undefined in enclosing environments" % self)
     def __repr__(self):
         if debug.DEBUG:
             return '<Symbol %s>' % self

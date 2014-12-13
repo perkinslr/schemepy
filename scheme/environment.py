@@ -19,3 +19,8 @@ class Environment(dict):
         return self[item]
     def __setitem__(self, key, value):
         dict.__setitem__(self, key, value)
+    def __repr__(self):
+        import Globals
+        if self is Globals.Globals:
+            return '{GLOBALS}'
+        return '<Environment parent=%r, %s>' %(self.parent, dict.__repr__(self))
