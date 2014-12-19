@@ -1,15 +1,19 @@
 from scheme.environment import Environment
 from scheme.symbol import Symbol
-class callCCBounce(Exception): pass
+
+
+class callCCBounce(Exception):
+    pass
+
 
 def deepcopy(lst):
     if isinstance(lst, dict) and not isinstance(lst, Environment):
-        d={}
+        d = {}
         for i in lst:
-            d[i]=deepcopy(lst[i])
+            d[i] = deepcopy(lst[i])
         return d
     if isinstance(lst, tuple):
-        lst=list(lst)
+        lst = list(lst)
     if not isinstance(lst, list):
         return lst
     o = []
@@ -43,38 +47,37 @@ def copy_with_quote(lst):
     return o
 
 
-def copy_with_quasiquote(processer, env, lst, lastlst = None, lastidx = None, ostack=None):
+def copy_with_quasiquote(processer, env, lst, last_lst=None, last_idx=None, o_stack=None):
     from scheme.unquote import unquote
-    from scheme.unquotesplicing import unquotesplicing
+    from scheme.unquote_splicing import unquote_splicing
     from scheme.macro import MacroSymbol
     from scheme.Globals import Globals
     if not isinstance(lst, list):
         if isinstance(lst, Symbol):
-            if lastidx == 0 and lst.isBound(Globals) and isinstance(lst.toObject(Globals), unquote):
-                qqtarget=lastlst.pop(lastidx+1)
-                retval = processer.process([qqtarget], env)
+            if last_idx == 0 and lst.isBound(Globals) and isinstance(lst.toObject(Globals), unquote):
+                qq_target = last_lst.pop(last_idx + 1)
+                retval = processer.process([qq_target], env)
                 return retval, True
             if lst == ',':
-                qqtarget=lastlst.pop(lastidx+1)
-                retval = processer.__class__(processer).process([qqtarget], env)
+                qq_target = last_lst.pop(last_idx + 1)
+                retval = processer.__class__(processer).process([qq_target], env)
                 return retval, False
-            if lastidx == 0 and lst.isBound(Globals) and isinstance(lst.toObject(Globals), unquotesplicing):
-
-                qqtarget=lastlst.pop(lastidx+1)
-                retval = processer.__class__(processer).process([qqtarget], env)
-                ostack.extend(retval)
+            if last_idx == 0 and lst.isBound(Globals) and isinstance(lst.toObject(Globals), unquote_splicing):
+                qq_target = last_lst.pop(last_idx + 1)
+                retval = processer.__class__(processer).process([qq_target], env)
+                o_stack.extend(retval)
                 return retval, 2
             if lst == ',@':
-                qqtarget=lastlst.pop(lastidx+1)
+                qq_target = last_lst.pop(last_idx + 1)
 
-                retval = processer.__class__(processer).process([qqtarget], env)
+                retval = processer.__class__(processer).process([qq_target], env)
                 return retval, 3
             return MacroSymbol(lst).setEnv({lst: lst}), False
         return lst, False
     o = []
-    ostack.append(o)
+    o_stack.append(o)
     for idx, i in enumerate(lst):
-        r = copy_with_quasiquote(processer, env, i, lst, idx, ostack)
+        r = copy_with_quasiquote(processer, env, i, lst, idx, o_stack)
         if r[1] == 3:
             o.extend(r[0])
             continue
@@ -85,6 +88,7 @@ def copy_with_quasiquote(processer, env, lst, lastlst = None, lastidx = None, os
         else:
             o.append(r[0])
     return o, False
+
 
 def symbols_to_values(lst, env):
     if not isinstance(lst, list):
@@ -100,25 +104,25 @@ def symbols_to_values(lst, env):
 def expand_quotes(lst):
     for idx, this in enumerate(lst):
         if this == "'":
-            quoteTarget=lst.pop(idx+1)
-            if quoteTarget=="'":
+            quoteTarget = lst.pop(idx + 1)
+            if quoteTarget == "'":
                 def getQuoteTarget():
-                    qt = lst.pop(idx+1)
+                    qt = lst.pop(idx + 1)
                     if qt == "'":
                         return [Symbol('quote'), getQuoteTarget()]
                     return qt
-                quoteTarget=[Symbol('quote'), getQuoteTarget()]
-            lst[idx]=[Symbol('quote'), quoteTarget]
+                quoteTarget = [Symbol('quote'), getQuoteTarget()]
+            lst[idx] = [Symbol('quote'), quoteTarget]
         elif this == "`":
-            quoteTarget=lst.pop(idx+1)
-            if quoteTarget=="`":
+            quoteTarget = lst.pop(idx + 1)
+            if quoteTarget == "`":
                 def getQuoteTarget():
-                    qt = lst.pop(idx+1)
+                    qt = lst.pop(idx + 1)
                     if qt == "`":
                         return [Symbol('quasiquote'), getQuoteTarget()]
                     return qt
-                quoteTarget=[Symbol('quasiquote'), getQuoteTarget()]
-            lst[idx]=[Symbol('quasiquote'), quoteTarget]
+                quoteTarget = [Symbol('quasiquote'), getQuoteTarget()]
+            lst[idx] = [Symbol('quasiquote'), quoteTarget]
         elif isinstance(this, list):
             expand_quotes(this)
     return lst
