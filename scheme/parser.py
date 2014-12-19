@@ -20,7 +20,7 @@ class Parser(object):
     def tokens(self):
         """Return the next token, reading new text into line buffer if needed."""
         while True:
-            if self.line=='\n' or self.line=='':
+            if self.line == '\n' or self.line == '':
                 self.line = self.file.readline().decode('iso-8859-1')
             if self.line == '':
                 break
@@ -29,12 +29,12 @@ class Parser(object):
             token, self.line = re.match(self.tokenizer, self.line).groups()
             if token != '' and not token.startswith(';'):
                 yield Token(token)
-            if self.line=='\n' or self.line=='':
+            if self.line == '\n' or self.line == '':
                 yield self.eol_object
         yield self.eof_object
     @property
     def ast(self):
-        tokens=self.tokens
+        tokens = self.tokens
         o = []
         def read_ahead(token):
             if '(' == token:

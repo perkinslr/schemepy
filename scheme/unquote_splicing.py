@@ -4,8 +4,8 @@ from scheme.Globals import Globals
 from scheme.begin import begin
 
 
-class unquote(begin):
+class unquote_splicing(begin):
     pass
 
 
-Globals['unquote'] = unquote()
+Globals['unquote-splicing'] = unquote_splicing()

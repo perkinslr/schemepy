@@ -1,7 +1,8 @@
 from zope import interface
 
 
-class Procedure(interface.Interface): 
+# noinspection PyMethodParameters,PyUnusedLocal
+class Procedure(interface.Interface):
     def __init__(ast, env):
         """"""
 
@@ -9,7 +10,7 @@ class Procedure(interface.Interface):
         """"""
 
 
-
+# noinspection PyMethodParameters,PyUnusedLocal
 class Macro(interface.Interface):
     def __init__(ast, env):
         """"""

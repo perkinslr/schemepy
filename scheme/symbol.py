@@ -5,15 +5,17 @@ from scheme.Globals import Globals
 import re
 
 
+# noinspection PyAttributeOutsideInit
 class Symbol(unicode):
     def toObject(self, env):
         if hasattr(self, 'cache'):
-            ret=self.cache
-            del(self.cache)
+            ret = self.cache
+            del (self.cache)
             return ret
         if self[0] == self[-1] == '"':
             return self[1:-1]
-        if '.' in self and (not self.replace('-','').replace('.','').replace('e','').isdigit() and not 'lambda:' in self and not '.' == self):
+        if '.' in self and (not self.replace('-', '').replace('.', '').replace('e', '').isdigit()
+                            and 'lambda:' not in self and '.' != self):
             lst = self.split('.')
             val = Symbol(lst[0]).toObject(env)
             for i in lst[1:]:
@@ -28,13 +30,13 @@ class Symbol(unicode):
         while env is not None:
             if unicode(self) in env:
                 return env[self]
-            if hasattr(env,'parent'):
+            if hasattr(env, 'parent'):
                 env = env.parent
             else:
-                env=None
+                env = None
         if self.lstrip('-').isdigit():
             return int(self)
-        if self.replace('-','').replace('.', '').replace('e','').isdigit():
+        if self.replace('-', '').replace('.', '').replace('e', '').isdigit():
             return float(self)
 
         if self == '#t':
@@ -42,26 +44,26 @@ class Symbol(unicode):
         if self == '#f':
             return False
         try:
-            return complex(self.replace('i','j',1))
+            return complex(self.replace('i', 'j', 1))
         except:
             raise NameError(u"Symbol '%s' undefined" % self)
     def isBound(self, env, cache=True):
         try:
             if self.lstrip('-').isdigit():
                 return True
-            if self.replace('-','').replace('.', '').replace('e','').isdigit():
+            if self.replace('-', '').replace('.', '').replace('e', '').isdigit():
                 return True
             if self == '#t':
                 return True
             if self == '#f':
                 return True
             try:
-                complex(self.replace('i','j',1))
+                complex(self.replace('i', 'j', 1))
                 return True
-            except:
+            except ValueError:
                 pass
             if cache:
-                self.cache=self.toObject(env)
+                self.cache = self.toObject(env)
             return True
         except NameError:
             return False
@@ -71,7 +73,7 @@ class Symbol(unicode):
                 return env
             env = env.parent
         if self.lstrip('-').isdigit() or self.lstrip('-').replace('.', '').isdigit() or self[0] == self[-1] == '"' or \
-                        self == '#t' or self == '#f':
+                self == '#t' or self == '#f':
             return Globals
         raise NameError(u"Symbol '%s' undefined in enclosing environments" % self)
     def __repr__(self):
@@ -84,12 +86,13 @@ class Symbol(unicode):
         return True
     def __eq__(self, other):
         if not isinstance(other, (unicode, str)) and self.isBound(Globals, True):
-            return self.toObject(Globals)==other
+            return self.toObject(Globals) == other
         return unicode.__eq__(self, other)
     def __add__(self, other):
+        print 92, self, other
         if (isinstance(other, Symbol)):
-            return self.toObject(Globals)+other.toObject(Globals)
+            return self.toObject(Globals) + other.toObject(Globals)
         if self.isBound(None):
-            return self.toObject(None)+other
-        return str(self)+other
+            return self.toObject(None) + other
+        return str(self) + other
 

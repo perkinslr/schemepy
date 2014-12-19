@@ -1,20 +1,24 @@
 # cython: profile=True
 
 
+from Queue import Empty
+from collections import deque
+
+from zope.interface import providedBy
+
 from scheme import Globals
 from scheme.utils import callCCBounce
 from scheme.environment import Environment
 from scheme.procedure import Procedure, SimpleProcedure
 from scheme.macro import Macro, MacroSymbol
 from scheme.utils import deepcopy, expand_quotes
-from zope.interface import providedBy
 from scheme.symbol import Symbol
-from Queue import LifoQueue, Empty
 from scheme import debug
 
-from collections import deque
+
 current_processer = None
 discarded_frames=[]
+# noinspection PyAttributeOutsideInit
 cdef class Processer(object):
     cdef int callDepth
     cdef int _stackPointer
@@ -71,7 +75,7 @@ cdef class Processer(object):
 #            raise Exception()
         self._children=[]
         self.parent=parent
-        if parent!=None:
+        if parent is not None:
             self.parent.children.append(self)
         self.callStack = deque()
         self.callDepth = 0
@@ -128,10 +132,13 @@ cdef class Processer(object):
         try:
             return self.process(_ast, env, callDepth)
         except callCCBounce as e:
+            # noinspection PyUnresolvedReferences
             return e.ret
         except Empty as e:
             if ('cont' in dir(e)):
+                # noinspection PyUnresolvedReferences
                 continuation = e.cont
+                # noinspection PyUnresolvedReferences
                 retval=e.ret
                 self.setContinuation([continuation, retval])
                 return self._process(processer.ast, processer.cenv, 1)
@@ -198,10 +205,10 @@ cdef class Processer(object):
                         e = Environment(this.env)
                         if isinstance(params, list):
                             if '.' in params:
-                                iterargs = iter(args)
+                                iter_args = iter(args)
                                 for idx, item in enumerate(params[:-2]):
-                                    e[item] = iterargs.next()
-                                e[params[-1]] = list(iterargs)
+                                    e[item] = iter_args.next()
+                                e[params[-1]] = list(iter_args)
                             else:
                                 if (isinstance(args, list) and len(args) != len(params)):
                                     raise TypeError("%r expected exactly %i arguments, got %i" % (
@@ -209,9 +216,9 @@ cdef class Processer(object):
                                 if (not isinstance(args, list) and 1 != len(params)):
                                     raise TypeError("%r expected exactly %i arguments, got %i" % (
                                         self, len(self._ast[0]), 1))
-                                iterargs = iter(args)
+                                iter_args = iter(args)
                                 for idx, item in enumerate(params):
-                                    e[item] = iterargs.next()
+                                    e[item] = iter_args.next()
                         else:
                             e[params] = args
                         self.popStackN()
@@ -267,7 +274,6 @@ cdef class Processer(object):
             if hasattr(e, 'ret'):
                 return e.ret
             return self._ast[-1]
-            raise e
 
 
 

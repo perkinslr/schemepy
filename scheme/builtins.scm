@@ -38,4 +38,15 @@
         (output "</table>"))
 
     (define define-syntax 'define)
+    (define-syntax let
+    (syntax-rules ()
+        ((let ((name value) ...) body ...) ((lambda (name ...) body ...) value ...))
+        ((let function-name ((name value) ...) body ...)
+            (let ()
+                (begin
+                (define function-name (lambda (name ...) body ...))
+                (function-name value ...))))))
+
+
+
 )

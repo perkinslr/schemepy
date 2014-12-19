@@ -19,7 +19,7 @@ import quote
 import let
 import quasiquote
 import unquote
-import unquotesplicing
+import unquote_splicing
 import let_aster
 
 from . import builtins

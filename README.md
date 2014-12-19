@@ -1,4 +1,4 @@
 schemepy
 ========
 
-Implementation of scheme in python supporting call/cc and hygenic macros
+Implementation of scheme in python supporting call/cc and hygienic macros

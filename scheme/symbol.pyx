@@ -5,6 +5,7 @@ from scheme.Globals import Globals
 import re
 
 
+# noinspection PyAttributeOutsideInit
 class Symbol(unicode):
     def toObject(self, env):
         if hasattr(self, 'cache'):
@@ -58,7 +59,7 @@ class Symbol(unicode):
             try:
                 complex(self.replace('i','j',1))
                 return True
-            except:
+            except ValueError:
                 pass
             if cache:
                 self.cache=self.toObject(env)
