@@ -71,14 +71,17 @@ class Processer(object):
             print
             print
         if isinstance(retval, Symbol):
-            retval = MacroSymbol(retval).setEnv({retval: retval.toObject(self.cenv)})
+            if isinstance(retval, SyntaxSymbol):
+                retval = MacroSymbol(retval).setObj(retval)
+            else:
+                retval = MacroSymbol(retval).setEnv({retval: retval.toObject(self.cenv)})
         if debug.DEBUG:
             discarded_frames.append((self.ast, self.cenv, self.stackPointer))
         self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
         self.callDepth -= 1
         if rv:
             self.ast[self.stackPointer] = retval
-        if debug.DEBUG:
+        if debug.DEBUG > 1:
             print self.ast, self.stackPointer
     def dumpStack(self):
         while self.callDepth > 0 and self.callStack.queue:
@@ -152,10 +155,8 @@ class Processer(object):
                     return self.ast[-1]
                 if self.stackPointer >= len(self.ast):
                     for idx, i in enumerate(self.ast):
-                        print 155, idx, i, isinstance(i, Symbol), self.callDepth
                         if isinstance(i, Symbol) and i.isBound(self.cenv):
                             self.ast[idx] = i.toObject(self.cenv)
-                    print 158, self.ast, self.callDepth
                     initial_call_depth = self.initialCallDepth
                     if isinstance(self.ast[0], Symbol):
                         self.ast[0] = self.ast[0].toObject(self.cenv)
@@ -189,6 +190,11 @@ class Processer(object):
                     elif Procedure in providedBy(self.ast[0]):
                         r = self.ast[0](self, self.ast[1:])
                         self.popStack(r)
+                    elif Macro in providedBy(self.ast[0]):
+                        r = self.ast[0](self, self.ast[1:])
+                        if r is None:
+                            continue
+                        self.popStack(r)
                     else:
                         r = self.ast[0](*self.ast[1:])
                         self.popStack(r)
@@ -215,7 +221,8 @@ class Processer(object):
                         continue
                     if not isinstance(r, list):
                         r1 = [lambda *x: r]
-                        self.ast[:] = r1
+                        #self.ast[:] = r1
+                        self.popStack(r1)
                     else:
                         self.ast[:] = r
                     continue

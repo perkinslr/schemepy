@@ -12,8 +12,9 @@ class Symbol(unicode):
             ret = self.cache
             del (self.cache)
             return ret
-        if self[0] == self[-1] == '"':
-            return self[1:-1]
+        if len(self) > 0:
+            if self[0] == self[-1] == '"':
+                return self[1:-1]
         if '.' in self and (not self.replace('-', '').replace('.', '').replace('e', '').isdigit()
                             and 'lambda:' not in self and '.' != self):
             lst = self.split('.')
@@ -24,9 +25,10 @@ class Symbol(unicode):
 
         if '[' in self:
             m = re.match('^(.+?)\[(.+?)\]$', self)
-            obj, key = m.groups()
-            val = Symbol('getitem').toObject(env)(Symbol(obj).toObject(env), Symbol(key).toObject(env))
-            return val
+            if m is not None:
+                obj, key = m.groups()
+                val = Symbol('getitem').toObject(env)(Symbol(obj).toObject(env), Symbol(key).toObject(env))
+                return val
         while env is not None:
             if unicode(self) in env:
                 return env[self]
@@ -89,7 +91,6 @@ class Symbol(unicode):
             return self.toObject(Globals) == other
         return unicode.__eq__(self, other)
     def __add__(self, other):
-        print 92, self, other
         if (isinstance(other, Symbol)):
             return self.toObject(Globals) + other.toObject(Globals)
         if self.isBound(None):

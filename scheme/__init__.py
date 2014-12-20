@@ -16,11 +16,10 @@ import symbol
 import token
 import utils
 import quote
-import let
 import quasiquote
 import unquote
 import unquote_splicing
-import let_aster
-
-from . import builtins
+import syntax_case
 import syntax_rules
+import define_syntax
+from . import builtins

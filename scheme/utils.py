@@ -126,3 +126,39 @@ def expand_quotes(lst):
         elif isinstance(this, list):
             expand_quotes(this)
     return lst
+
+
+def transformCode(code, bindings, env, transformer):
+    """
+    Recursive function to build the transformed code
+    :param code: code to transform
+    :param bindings:  Environment which details which symbols should not be looked up in the macro's environment
+    :param env: Environment to store macro-variables and to use for macro-variable lookup
+    :param transformer: the transformer for which the SyntaxSymbols are generated
+    :return: transformed code
+    """
+    o = []
+    from scheme.syntax import SyntaxSymbol
+    iterCode = iter(enumerate(code))
+    for idx, i in iterCode:
+        if len(code) > idx + 1 and code[idx + 1] == '...':
+            iterCode.next()
+            o.extend(transformCode(list(bindings.get_all(i)), bindings, env, transformer))
+            continue
+        if i == '.':
+            idx_p1, i_p1 = iterCode.next()
+            o_p1 = transformCode(code[idx_p1].toObject(bindings), bindings, env, transformer)
+            o.extend(o_p1)
+            continue
+        if isinstance(i, (list, tuple)):
+            o.append(transformCode(i, bindings, env, transformer))
+        else:
+            if i not in bindings:
+                o.append(SyntaxSymbol(i).setEnv(env).setSymbol(Symbol(i)).setSyntax(transformer))
+            else:
+                o.append(bindings[i])
+                # if i == '...' and code[idx-1] in bindings:
+                # o.pop(-1)
+                # o.pop(-1)
+                # o.extend(bindings[code[idx - 1]])
+    return o
