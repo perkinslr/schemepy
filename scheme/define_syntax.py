@@ -15,8 +15,10 @@ class DefinedSyntax(object):
         self.transformer = transformer
         directlyProvides(transformer, Macro)
     def __call__(self, processer, params):
-        syntax_object = SyntaxSymbol(params).setSymbol(params)
+        syntax_object = SyntaxSymbol([processer.ast[0]] + params).setSymbol([processer.ast[0]] + params)
+        print 19, syntax_object
         o = self.transformer(processer, [syntax_object])
+        print 20, o, processer.ast
         if o is not None:
             processer.popStack(o[0])
         #processer.popStack([self.transformer, syntax_object])

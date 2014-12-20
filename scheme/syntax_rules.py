@@ -38,7 +38,7 @@ class syntax_rules(object):
         params=params[0].toObject(processer.cenv)
         for pattern in self.patterns:
             template = pattern[1:]
-            pattern = pattern[0][1:]
+            pattern = pattern[0]
             bindings = PatternMatcher(pattern, self.literals).match(params)
             if bindings is None:
                 continue

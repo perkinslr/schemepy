@@ -28,8 +28,10 @@ class syntax_case(object):
     def __call__(self, processer, params):
         e = processer.cenv
         syntax_object = params[0]
-        syntax_object = processer.process([syntax_object])
+        syntax_object = processer.process([syntax_object], e)
         syntax_list = syntax_object.toObject(e)
+        while isinstance(syntax_list, SyntaxSymbol):
+            syntax_list = syntax_list.toObject(e)
         literals = params[1]
         patterns = params[2:]
         name = patterns[0][0][0]
@@ -41,7 +43,7 @@ class syntax_case(object):
             else:
                 template = pattern[2:]
                 guard = pattern[1]
-                pattern = pattern[0][1:]
+                pattern = pattern[0]
             bindings = PatternMatcher(pattern, literals).match(syntax_list)
             if bindings is None:
                 continue
@@ -52,17 +54,8 @@ class syntax_case(object):
             processer.popStackN()
             env = Environment(processer.cenv)
             transformedCode = transformCode(template, bindings, env, bindings)[0]
-            osp = processer.stackPointer
-            transformedCode = processer.process([transformedCode], processer.cenv)
-            O.append(transformedCode)
-            try:
-                processer.popStack([transformedCode])
-            except Empty:
-                processer.ast=[transformedCode]
-            #processer.ast = transformedCode
-            processer.stackPointer = osp
-            return
-        raise SyntaxError("syntax-case no case matching %r for %s" % (syntax_object, name))
+            return transformedCode
+        raise SyntaxError("syntax-case no case matching %r for %s" % (syntax_list, name))
 
 
 import scheme.Globals
