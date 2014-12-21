@@ -1,14 +1,14 @@
 from __future__ import division, unicode_literals
 from Queue import Empty
 from scheme.symbol import Symbol
-from zope.interface import classProvides, implements
+from zope.interface import classProvides, implements, implementer, provider
 from scheme.macro import Macro
 from scheme.Globals import Globals
 __author__ = 'perkins'
 
 # noinspection PyAttributeOutsideInit
+@provider(Macro)
 class SyntaxSymbol(Symbol):
-    classProvides(Macro)
     def __init__(self, *args):
         self.line=0
         if len(args) > 1:
@@ -56,9 +56,8 @@ class SyntaxSymbol(Symbol):
     def __repr__(self):
         return "<SyntaxSymbol %s>" % Symbol.__repr__(self)
 
-
+@implementer(Macro)
 class syntax(object):
-    implements(Macro)
     def __init__(self, *args):
         pass
     def __call__(self, processer, template):

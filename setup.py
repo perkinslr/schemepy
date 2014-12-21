@@ -10,7 +10,7 @@ except:
 
 
 setup(name='SchemePy',
-      version='1.1',
+      version='1.1.01',
       description='R5RS scheme interpreter, supporting hygenic macros and full call/cc',
       author='Logan Perkins',
       author_email='perkins@flyingjnl.net',
@@ -19,7 +19,13 @@ setup(name='SchemePy',
       ext_modules = cythonize("scheme/*.pyx") if cythonize else None,
       requires = ['zope.interface'],
       data_files = [['/usr/share/schemepy/stdlib',['scheme/builtins.scm']]],
-      scripts = ['scripts/schemepy']
+      scripts = ['scripts/schemepy'],
+      author = "Logan Perkins",
+      license = "LGPL",
+      keywords = "scheme r5rs define-syntax call/cc",
+      url = "https://github.com/perkinslr/schemepy",
+      long_description=open('README.md').read(),
+
      )
 
 
