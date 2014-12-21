@@ -22,4 +22,6 @@ import unquote_splicing
 import syntax_case
 import syntax_rules
 import define_syntax
+import quasisyntax
+
 from . import builtins

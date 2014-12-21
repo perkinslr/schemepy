@@ -111,6 +111,17 @@ lispy_tests = [
      2 ; more ; comments ; ) )
      3) ; final comment""", ['1', '2', '3']),
     ('''(defmacro (for x in l . calls) (for-each (lambda (,x) ,@calls) ,l))''', None),
+    ('''(define tst (lambda (x) (syntax (+ 1 2))))''', None),
+    ('''(tst 5)''', ['+','1','2']),
+    ('''(define-syntax tst (lambda (x) (syntax (+ 1 2))))''', None),
+    ('''(tst 5)''', 3),
+    ('''(define-syntax when
+            (lambda (x)
+                (syntax-case x ()
+                    ((_ test e e* ...)
+                        (syntax (if test (begin e e* ...)))))))''', None),
+    ('''(when (< 0 5) "true")''', "true"),
+    ('''(when (> 0 5) "true")''', False),
     # ('''(for x in '(1 2 3) x)''', 3)
 ]
 
@@ -131,7 +142,6 @@ def test(tests, name=''):
                 if isinstance(result, expected):
                     ok = True
         except Exception as e:
-            print 121, p.callDepth
             p.dumpStack()
             print x, '=raises=>', type(e).__name__, e
             ok = type(expected) == type and issubclass(expected, Exception) and isinstance(e, expected)

@@ -53,8 +53,8 @@ class syntax_case(object):
                 continue
             processer.popStackN()
             env = Environment(processer.cenv)
-            transformedCode = transformCode(template, bindings, env, bindings)[0]
-            return transformedCode
+            transformedCode = transformCode(template, bindings, env, bindings)
+            return transformedCode[0]
         raise SyntaxError("syntax-case no case matching %r for %s" % (syntax_list, name))
 
 

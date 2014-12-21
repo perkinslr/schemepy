@@ -61,7 +61,7 @@ class Processer(object):
         self.cenv = Environment(self.cenv)
         self.stackPointer = 0
         self.callDepth += 1
-    def popStack(self, retval):
+    def popStack(self, retval, wrap=True):
         if debug.DEBUG > 1:
             import traceback
             traceback.print_stack()
@@ -70,7 +70,7 @@ class Processer(object):
                 print self.callStack.queue[-1][0], self.callStack.queue[-1][2]
             print
             print
-        if isinstance(retval, Symbol):
+        if isinstance(retval, Symbol) and wrap:
             if isinstance(retval, SyntaxSymbol):
                 retval = MacroSymbol(retval).setObj(retval)
             else:
@@ -219,7 +219,9 @@ class Processer(object):
                     self.initialCallDepth = initial_call_depth
                     if r is None:
                         continue
-                    if not isinstance(r, list):
+                    if isinstance(r, SyntaxSymbol):
+                        self.popStack(r)
+                    elif not isinstance(r, list):
                         r1 = [lambda *x: r]
                         #self.ast[:] = r1
                         self.popStack(r1)

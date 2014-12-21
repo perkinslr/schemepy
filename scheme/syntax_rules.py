@@ -44,11 +44,11 @@ class syntax_rules(object):
                 continue
             env = Environment(self.env)
             transformedCode = transformCode(template, bindings, env, self)[0]
-            osp = processer.stackPointer
-            processer.popStack(transformedCode)
-            #processer.ast = transformedCode
-            processer.stackPointer = osp
-            return
+            #osp = processer.stackPointer
+            #processer.popStack(transformedCode)
+            ##processer.ast = transformedCode
+            #processer.stackPointer = osp
+            return transformedCode
 
         raise SyntaxError("syntax-rules no case matching %r for %s" % (params, self.name))
 

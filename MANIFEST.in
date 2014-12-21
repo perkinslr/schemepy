@@ -1,0 +1,3 @@
+recursive-include scheme *.scm
+recursive-include scheme  *.pyx *.px[di] *.h *.c *.scm
+

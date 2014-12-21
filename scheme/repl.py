@@ -27,7 +27,12 @@ def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
                 r = processer.doProcess(ast)
             except Empty as e:
                 # noinspection PyUnresolvedReferences
-                r = e.ret
+                if hasattr(e, 'ret'):
+                    r = e.ret
+                else:
+                    import traceback
+                    traceback.print_exc()
+                    raise e
             except Exception as e:
                 if debug.DEBUG:
                     import traceback

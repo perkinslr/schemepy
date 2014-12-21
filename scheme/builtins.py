@@ -1,5 +1,5 @@
 from __future__ import division
-
+import os
 import sys
 import math
 import cmath
@@ -10,7 +10,7 @@ from scheme import debug
 from scheme.Globals import Globals
 from scheme.macro import Macro
 from scheme.procedure import Procedure
-
+import cStringIO
 
 def setDebug(b):
     debug.DEBUG = b
@@ -51,6 +51,8 @@ def add_globals(self):
     self.update(vars(math))
     self.update(vars(cmath))
     self.update({
+        'open-output-string': lambda: cStringIO.StringIO(),
+        'get-output-string': lambda ioObj: ioObj.getvalue(),
         '%': op.mod,
         'procedure?': lambda x: Procedure in providedBy(x),
         'set-debug': setDebug,
@@ -78,7 +80,10 @@ def add_globals(self):
         'last': last,
         'display': lambda x, port=sys.stdout: port.write(x.replace('~n', '\n') if isa(x, (str, unicode)) else str(x))})
     from repl import repl
-    repl(open(__file__.rsplit('/', 1)[0] + '/builtins.scm'), '', None)
+    if 'builtins.scm' in os.listdir(__file__.rsplit('/', 1)[0]):
+        repl(open(__file__.rsplit('/', 1)[0] + '/builtins.scm'), '', None)
+    else:
+        repl(open('/usr/share/schemepy/stdlib/builtins.scm'), '', None)
     return self
 
 

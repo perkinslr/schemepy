@@ -72,7 +72,6 @@ class PatternMatcher(object):
         :param params: [Symbol]
         :return: dictionary of pattern variables or False if not a matching pattern
         """
-        print 75, params, self.pattern
         o = SyntaxEnvironment()
         O.append(o)
         if not isinstance(self.pattern, list):  # we're a single element

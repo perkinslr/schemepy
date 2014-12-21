@@ -16,12 +16,11 @@ class DefinedSyntax(object):
         directlyProvides(transformer, Macro)
     def __call__(self, processer, params):
         syntax_object = SyntaxSymbol([processer.ast[0]] + params).setSymbol([processer.ast[0]] + params)
-        print 19, syntax_object
+        osp = processer.stackPointer
         o = self.transformer(processer, [syntax_object])
-        print 20, o, processer.ast
         if o is not None:
-            processer.popStack(o[0])
-        #processer.popStack([self.transformer, syntax_object])
+            processer.popStack(o)
+        processer.stackPointer = osp
 
 
 class DefineSyntax(object):

@@ -10,6 +10,7 @@ __author__ = 'perkins'
 class SyntaxSymbol(Symbol):
     classProvides(Macro)
     def __init__(self, *args):
+        self.line=0
         if len(args) > 1:
             processer, template = args
             self.setSymbol(template)
@@ -38,6 +39,16 @@ class SyntaxSymbol(Symbol):
             return self.symbol
         return self.symbol.toObject(self.env)
     def getEnv(self, env):
+        try:
+            possibleEnv = Symbol.getEnv(self, env)
+        except NameError:
+            possibleEnv = None
+        if possibleEnv:
+            keys = possibleEnv.keys()
+            if self in keys:
+                possibleSymbol = keys[keys.index(self)]
+                if isinstance(possibleSymbol, SyntaxSymbol) and possibleSymbol.transformer == self.transformer:
+                    return possibleEnv
         return self.symbol.getEnv(self.env)
     def setEnv(self, env):
         self.env = env
@@ -51,10 +62,8 @@ class syntax(object):
     def __init__(self, *args):
         pass
     def __call__(self, processer, template):
-        try:
-            processer.popStack(SyntaxSymbol(processer, template).setSymbol(template))
-        except Empty:
-            processer.ast = [SyntaxSymbol(processer, template).setSymbol(template)]
+        o = SyntaxSymbol(processer, template[0]).setSymbol(template[0])
+        return o
 
 
 
