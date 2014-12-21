@@ -90,3 +90,13 @@ Tail recursion and general Tail-Call-Optimisation
 Tail recursion is not handled differently from other tail calls; but, 
 TCO is partially supported.  Some calls recursively call process(), 
 which breaks TCO, but most calls are properly TC optimised.
+
+
+
+Booleans
+---------
+
+Truth values follow python's convention rather than scheme's (0, 
+False, None, (), and '' are false, or anything which provides a 
+__bool__ method which returns False).  If you need scheme's behaviour, 
+simply rewrite eq? and what not to check for identity against False.
