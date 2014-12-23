@@ -122,6 +122,7 @@ lispy_tests = [
                         (syntax (if test (begin e e* ...)))))))''', None),
     ('''(when (< 0 5) "true")''', "true"),
     ('''(when (> 0 5) "true")''', False),
+    ('''(let-syntax ((s (lambda (x) #'(+ 1 2)))) (+ 5 (s)))''', 8),
     # ('''(for x in '(1 2 3) x)''', 3)
 ]
 

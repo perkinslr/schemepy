@@ -45,12 +45,12 @@ def schemeApply(callable_, args):
 def List(*x):
     return list(x)
 
-def add_globals(self):
+def add_globals(env):
     """Add some Scheme standard procedures."""
     import scheme.eval
-    self.update(vars(math))
-    self.update(vars(cmath))
-    self.update({
+    env.update(vars(math))
+    env.update(vars(cmath))
+    env.update({
         'open-output-string': lambda: cStringIO.StringIO(),
         'get-output-string': lambda ioObj: ioObj.getvalue(),
         '%': op.mod,
@@ -80,11 +80,20 @@ def add_globals(self):
         'last': last,
         'display': lambda x, port=sys.stdout: port.write(x.replace('~n', '\n') if isa(x, (str, unicode)) else str(x))})
     from repl import repl
-    if 'builtins.scm' in os.listdir(__file__.rsplit('/', 1)[0]):
-        repl(open(__file__.rsplit('/', 1)[0] + '/builtins.scm'), '', None)
+    import site
+    package_locations = site.getsitepackages()
+    installed = False
+    for pl in package_locations:
+        if __file__.startswith(pl):
+            installed = True
+            break
+    if installed:
+        p = os.path.join(sys.prefix,'share','schemepy','stdlib')
     else:
-        repl(open('/usr/share/schemepy/stdlib/builtins.scm'), '', None)
-    return self
+        p = os.path.join(*os.path.split(__file__)[:-2]+('stdlib',))
+    for scm in os.listdir(p):
+        repl(open(os.path.join(p,scm)), '', None)
+    return env
 
 
 add_globals(Globals)

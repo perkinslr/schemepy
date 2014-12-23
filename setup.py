@@ -5,12 +5,12 @@ except:
 	cythonize=False
 
 
-
+import os
 
 
 
 setup(name='SchemePy',
-      version='1.1.01',
+      version='1.1.02',
       description='R5RS scheme interpreter, supporting hygenic macros and full call/cc',
       author='Logan Perkins',
       author_email='perkins@flyingjnl.net',
@@ -18,12 +18,10 @@ setup(name='SchemePy',
       packages=['scheme'],
       ext_modules = cythonize("scheme/*.pyx") if cythonize else None,
       requires = ['zope.interface'],
-      data_files = [['/usr/share/schemepy/stdlib',['scheme/builtins.scm']]],
+      data_files = [['/usr/share/schemepy/stdlib',[os.path.join('stdlib', i) for i in os.listdir('stdlib')]]],
       scripts = ['scripts/schemepy'],
-      author = "Logan Perkins",
       license = "LGPL",
       keywords = "scheme r5rs define-syntax call/cc",
-      url = "https://github.com/perkinslr/schemepy",
       long_description=open('README.md').read(),
 
      )

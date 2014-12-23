@@ -1,0 +1,1 @@
+(define (newline) (display "~n"))
