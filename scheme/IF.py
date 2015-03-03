@@ -20,18 +20,20 @@ class IF(object):
         if_false = params[2] if len(params) == 3 else False
         env = processer.cenv
         if isinstance(conditional, list):
-            old_stack_pointer=processer.stackPointer
-            processer.stackPointer=1
+            old_stack_pointer = processer.stackPointer
+            processer.stackPointer = 1
             processer.pushStack(conditional)
+            # noinspection PyTypeChecker
             ret = processer.__class__(processer).process([Symbol('Begin')] + [conditional], env)
             processer.popStack(ret)
-            processer.stackPointer=old_stack_pointer
+            processer.stackPointer = old_stack_pointer
             if ret:
                 return if_true
             else:
                 return if_false
         else:
-            if (isinstance(conditional, Symbol) and conditional.toObject(env)) or (not isinstance(conditional, Symbol) and conditional):
+            if (isinstance(conditional, Symbol) and conditional.toObject(env)) or (
+                    not isinstance(conditional, Symbol) and conditional):
                 return if_true
             else:
                 return if_false

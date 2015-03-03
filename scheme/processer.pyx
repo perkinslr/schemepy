@@ -38,7 +38,8 @@ class Processer(object):
         return dict(env=self.cenv, callDepth=self.callDepth + pc['callDepth'],
                     callStack=deepcopy(self.callStack.queue) + pc['callStack'],
                     initialCallDepth=self.initialCallDepth + pc['initialCallDepth'], stackPointer=self.stackPointer)
-    def setContinuation(self, (continuation, retval)):
+    def setContinuation(self, arg):
+        (continuation, retval) = arg
         self.callStack.queue[:] = deepcopy(continuation['callStack'])
         self.callDepth = continuation['callDepth']
         self.cenv = continuation['env']
@@ -173,11 +174,11 @@ class Processer(object):
                                 e[params[-1]] = list(iter_args)
                             else:
                                 if (isinstance(args, list) and len(args) != len(params)):
-                                    raise TypeError("%r expected exactly %i arguments, got %i" % (
-                                        self, len(self.ast[0]), len(args)))
+                                    raise TypeError("%r expected exactly %i arguments (%r), got %i" % (
+                                        this, len(this.ast[0]), this.ast[0], len(args)))
                                 if (not isinstance(args, list) and 1 != len(params)):
                                     raise TypeError("%r expected exactly %i arguments, got %i" % (
-                                        self, len(self.ast[0]), 1))
+                                        this, len(this.ast[0]), 1))
                                 iter_args = iter(args)
                                 for idx, item in enumerate(params):
                                     e[item] = iter_args.next()

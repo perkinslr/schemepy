@@ -1,11 +1,10 @@
 __author__ = 'perkins'
 
-
-from scheme.macro import Macro, MacroSymbol
-from scheme.Globals import Globals
 from zope.interface import implements
-from utils import copy_with_quote
 
+from scheme.macro import Macro
+from scheme.Globals import Globals
+from utils import copy_with_quote
 
 
 class quote(object):
@@ -13,11 +12,10 @@ class quote(object):
     def __init__(self):
         pass
     def __call__(self, processer, params):
-        env = processer.cenv.parent
         if len(params) > 1:
             raise SyntaxError("quote accepts only 1 argument")
         processer.popStack(copy_with_quote(params)[0])
-        processer.stackPointer+=1
+        processer.stackPointer += 1
         return None
 
 

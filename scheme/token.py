@@ -2,6 +2,9 @@ from symbol import Symbol
 
 
 class Token(unicode):
+    def setLine(self, l):
+        self.line=l
+        return self
     @property
     def symbol(self):
         """
@@ -9,4 +12,4 @@ class Token(unicode):
 
         :return: Symbol
         """
-        return Symbol(self)
+        return Symbol(self).setLine(self.line)

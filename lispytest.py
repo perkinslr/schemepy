@@ -1,16 +1,19 @@
-#Cribbed from Peter Norvig's scheme interpreter in python, http://norvig.com/lispy2.html
+#! /usr/bin/python2.7
+# Cribbed from Peter Norvig's scheme interpreter in python, http://norvig.com/lispy2.html
 
 
-################ Tests for lis.py and lispy.py
+# ############### Tests for lis.py and lispy.py
 import scheme.symbol
 import scheme.procedure
+
+
 lis_tests = [
     ("(quote (testing 1 (2.0) -3.14e159))", ['testing', '1', ['2.0'], '-3.14e159']),
     ("(+ 2 2)", 4),
     ("(+ (* 2 100) (* 1 10))", 210),
     ("(if (> 6 5) (+ 1 1) (+ 2 2))", 2),
     ("(if (< 6 5) (+ 1 1) (+ 2 2))", 4),
-    ("(define x 3)", 3), ("x", 3), ("(+ x x)", 6),
+    ("(define x 3)", None), ("x", 3), ("(+ x x)", 6),
     ("(begin (define x 1) (set! x (+ x 1)) (+ x 1))", 3),
     ("((lambda (x) (+ x x)) 5)", 10),
     ("(define twice (lambda (x) (* 2 x)))", None), ("(twice 5)", 10),
@@ -36,26 +39,26 @@ lis_tests = [
         (define mid (lambda (seq) (/ (length seq) 2)))
         ((combine append) (take (mid deck) deck) (drop (mid deck) deck)))))""", None),
     ("(riff-shuffle (list 1 2 3 4 5 6 7 8))", [1, 5, 2, 6, 3, 7, 4, 8]),
-    ("((repeat riff-shuffle) (list 1 2 3 4 5 6 7 8))",  [1, 3, 5, 7, 2, 4, 6, 8]),
-    ("(riff-shuffle (riff-shuffle (riff-shuffle (list 1 2 3 4 5 6 7 8))))", [1,2,3,4,5,6,7,8]),
+    ("((repeat riff-shuffle) (list 1 2 3 4 5 6 7 8))", [1, 3, 5, 7, 2, 4, 6, 8]),
+    ("(riff-shuffle (riff-shuffle (riff-shuffle (list 1 2 3 4 5 6 7 8))))", [1, 2, 3, 4, 5, 6, 7, 8]),
     ("(and (begin 0) 6)", 0),
-    ]
+]
 
 lispy_tests = [
-    ("()", SyntaxError), 
-    ("(set! x)", IndexError), 
-    ("(define 3 4)", 4),
+    ("()", SyntaxError),
+    ("(set! x)", IndexError),
+    ("(define 3 4)", None),
     ("(define 3 (- 3 1))", None),
-    ("(quote 1 2)", SyntaxError), 
-    ("(if 1 2 3 4)", SyntaxError), 
+    ("(quote 1 2)", SyntaxError),
+    ("(if 1 2 3 4)", SyntaxError),
     ("(lambda (x))", scheme.procedure.SimpleProcedure),
     ("""(if (= 1 1) (define-macro (a b) a)
           (define-macro a (quote b)))""", None),
-    ("(define (twice x) (* 2 x))", None), 
+    ("(define (twice x) (* 2 x))", None),
     ("(twice 2)", 4),
     ("(twice 2 2)", TypeError),
     ("(define lyst (lambda items items))", None),
-    ("(lyst 1 2 3 (+ 2 2))", [1,2,3,4]),
+    ("(lyst 1 2 3 (+ 2 2))", [1, 2, 3, 4]),
     ("(if 1 2)", 2),
     ("(if (= 3 4) 2)", False),
     ("(define ((account bal) amt) (set! bal (+ bal amt)) bal)", None),
@@ -74,9 +77,9 @@ lispy_tests = [
          (define (sumsq-acc start end acc)
             (if (> start end) acc (sumsq-acc (+ start 1) end (+ (* start start) acc))))
          (sumsq-acc start end 0))""", None),
-    
+
     ("(call/cc (lambda (throw) (+ 5 (* (throw 1) 10 )))) ;; throw", 1),
-    #("(sum-squares-range 1 3000)", 9004500500), ## Tests tail recursion
+    # ("(sum-squares-range 1 3000)", 9004500500), ## Tests tail recursion
     ("(call/cc (lambda (throw) (+ 5 (* 10 1)))) ;; do not throw", 15),
     ("""(call/cc (lambda (throw) 
          (+ 5 (* 10 (call/cc (lambda (escape) (* 100 (escape 3)))))))) ; 1 level""", 35),
@@ -89,24 +92,40 @@ lispy_tests = [
     ("(let ((a 1) (b 2 3)) (+ a b))", SyntaxError),
     ("(and 1 2 3)", 3), ("(and (> 2 1) 2 3)", 3), ("(and)", True),
     ("(and (> 2 1) (> 2 3))", False),
-    ("(define-macro (unless . args) (display 'xyzzy) (display args) (quasiquote (if (not ,(car args)) (begin ,@(cdr args))))) ; test `", None),
+    (
+        "(define-macro (unless . args) (display 'xyzzy) (display args) "
+        "(quasiquote (if (not ,(car args)) (begin ,@(cdr args))))) ; test `",
+        None),
     ("(unless (= 2 (+ 1 1)) (display 2) 3 4)", False),
     (r'(unless (= 4 (+ 1 1)) (display 2) (display "\n") 3 4)', 4),
-    ("(quote x)", 'x'), 
-    ("(quote (1 2 three))", ['1', '2', 'three']), 
+    ("(quote x)", 'x'),
+    ("(quote (1 2 three))", ['1', '2', 'three']),
     ("'x", 'x'),
     ("'(one 2 3)", ['one', '2', '3']),
     ("(define L (list 1 2 3))", None),
-    ("`(testing ,@L testing)", ['testing',1,2,3,'testing']),
-    ("`(testing ,L testing)", ['testing',[1,2,3],'testing']),
+    ("`(testing ,@L testing)", ['testing', 1, 2, 3, 'testing']),
+    ("`(testing ,L testing)", ['testing', [1, 2, 3], 'testing']),
     ("`,@L", IndexError),
     ("""'(1 ;test comments '
      ;skip this line
      2 ; more ; comments ; ) )
-     3) ; final comment""", ['1','2','3']),
-     ('''(defmacro (for x in l . calls) (for-each (lambda (x) ,@calls) ,l))''', None),
-     ('''(for x in '(1 2 3) x)''', 3)
-    ]
+     3) ; final comment""", ['1', '2', '3']),
+    ('''(defmacro (for x in l . calls) (for-each (lambda (,x) ,@calls) ,l))''', None),
+    ('''(define tst (lambda (x) (syntax (+ 1 2))))''', None),
+    ('''(tst 5)''', ['+','1','2']),
+    ('''(define-syntax tst (lambda (x) (syntax (+ 1 2))))''', None),
+    ('''(tst 5)''', 3),
+    ('''(define-syntax when
+            (lambda (x)
+                (syntax-case x ()
+                    ((_ test e e* ...)
+                        (syntax (if test (begin e e* ...)))))))''', None),
+    ('''(when (< 0 5) "true")''', "true"),
+    ('''(when (> 0 5) "true")''', False),
+    ('''(let-syntax ((s (lambda (x) #'(+ 1 2)))) (+ 5 (s)))''', 8),
+    # ('''(for x in '(1 2 3) x)''', 3)
+]
+
 
 def test(tests, name=''):
     import scheme.Globals
@@ -117,23 +136,22 @@ def test(tests, name=''):
             result = Eval(x)
             if isinstance(result, scheme.symbol.Symbol):
                 if result.isBound(scheme.Globals.Globals):
-                    result=result.toObject(scheme.Globals.Globals)
+                    result = result.toObject(scheme.Globals.Globals)
             print x, '=>', repr(result)
-            ok = (result == expected)
+            ok = (result == expected) or expected is None
             if not ok and type(expected) == type:
                 if isinstance(result, expected):
-                    ok=True
+                    ok = True
         except Exception as e:
-            print 121, p.callDepth
             p.dumpStack()
             print x, '=raises=>', type(e).__name__, e
             ok = type(expected) == type and issubclass(expected, Exception) and isinstance(e, expected)
         if not ok:
             fails += 1
             print 'FAIL!!!  Expected', expected
-    print '%s %s: %d out of %d tests fail.' % ('*'*45, name, fails, len(tests))
+    print '%s %s: %d out of %d tests fail.' % ('*' * 45, name, fails, len(tests))
+
 
 if __name__ == '__main__':
-    import sys
     from scheme.eval import Eval, p
-    test(lis_tests+lispy_tests, 'lispy.py')
+    test(lis_tests + lispy_tests, 'lispy.py')

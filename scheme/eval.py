@@ -4,21 +4,27 @@ import parser
 
 import processer
 import utils
-p=processer.processer
+
+
+p = processer.processer
+
 
 def Eval(obj):
     if isinstance(obj, (str, unicode)):
         obj = cStringIO.StringIO(obj)
     ast = parser.Parser(obj).ast
     try:
-        ret = p._process(ast)
+        ret = p.doProcess(ast)
     except Empty as e:
+        # noinspection PyUnresolvedReferences
         ret = e.ret
     return ret
 
+
 def Exec(ast):
     try:
-        ret = p._process(utils.deepcopy(ast))
+        ret = p.doProcess(utils.deepcopy(ast))
     except Empty as e:
+        # noinspection PyUnresolvedReferences
         ret = e.ret
     return ret

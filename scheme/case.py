@@ -16,15 +16,15 @@ class switch(object):
         if isinstance(params[0], list):
             key = processer.process([params[0]], processer.cenv)
         else:
-            key=params[0].toObject(processer.cenv)
-        clauses=params[1:]
-        ret=[]
-        begun=False
+            key = params[0].toObject(processer.cenv)
+        clauses = params[1:]
+        ret = []
+        begun = False
         for clause in clauses:
-            if clause[0]=='else':
-                begun=True
+            if clause[0] == 'else':
+                begun = True
             if begun:
-                if clause[-1]=='break':
+                if clause[-1] == 'break':
                     ret.extend(clause[1:-1])
                     break;
                 ret.extend(clause[1:])
@@ -32,14 +32,15 @@ class switch(object):
                 if isinstance(clause[0], list):
                     val = processer.process([clause[0]], processer.cenv)
                 else:
-                    val=clause[0].toObject(processer.cenv)
+                    val = clause[0].toObject(processer.cenv)
                 if key == val or (isinstance(val, list) and key in val):
-                    begun=True
-                    if clause[-1]=='break':
+                    begun = True
+                    if clause[-1] == 'break':
                         ret.extend(clause[1:-1])
                         break;
                     ret.extend(clause[1:])
         return [Symbol('begin')] + ret
+
 
 class case(object):
     implements(Macro)
@@ -49,17 +50,17 @@ class case(object):
         if isinstance(params[0], list):
             key = processer.process([params[0]], processer.cenv)
         else:
-            key=params[0].toObject(processer.cenv)
-        clauses=params[1:]
-        ret=[]
+            key = params[0].toObject(processer.cenv)
+        clauses = params[1:]
+        ret = []
         for clause in clauses:
-            if clause[0]=='else':
+            if clause[0] == 'else':
                 ret.extend(clause[1:])
             else:
                 if isinstance(clause[0], list):
                     val = processer.process([clause[0]], processer.cenv)
                 else:
-                    val=clause[0].toObject(processer.cenv)
+                    val = clause[0].toObject(processer.cenv)
                 if key == val or (isinstance(val, list) and key in val):
                     ret.extend(clause[1:])
                     break;

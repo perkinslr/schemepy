@@ -4,11 +4,13 @@ from scheme import debug
 
 __author__ = 'perkins'
 
-
 from scheme.parser import Parser
 import scheme.processer
+
+
 processer = scheme.processer.processer
 import sys
+
 
 def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
     global parser
@@ -22,9 +24,15 @@ def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
             continue
         if ast:
             try:
-                r = processer._process(ast)
+                r = processer.doProcess(ast)
             except Empty as e:
-                r = e.ret
+                # noinspection PyUnresolvedReferences
+                if hasattr(e, 'ret'):
+                    r = e.ret
+                else:
+                    import traceback
+                    traceback.print_exc()
+                    raise e
             except Exception as e:
                 if debug.DEBUG:
                     import traceback
@@ -32,7 +40,7 @@ def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
                     print processer.ast
                     print processer.children[-1].ast
                     print scheme.processer.current_processer.ast
-                r=e
+                r = e
             if r is not None and of:
                 print >> of, r
         else:

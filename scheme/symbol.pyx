@@ -7,7 +7,6 @@ import re
 
 # noinspection PyAttributeOutsideInit
 class Symbol(unicode):
-    line=0
     def setLine(self, line):
         self.line=line
         return self
@@ -84,7 +83,9 @@ class Symbol(unicode):
         raise NameError(u"Symbol '%s' undefined in enclosing environments" % self)
     def __repr__(self):
         if debug.DEBUG:
-            return '<Symbol %s (line %i)>' % (self, self.line)
+            if hasattr(self, 'line'):
+                return '<Symbol %s (line %i)>' % (self, self.line)
+            return '<Symbol %s>' % (self)
         return str(self)
     def __bool__(self):
         if self.isBound(None):
