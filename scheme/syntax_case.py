@@ -34,7 +34,6 @@ class syntax_case(object):
             syntax_list = syntax_list.toObject(e)
         literals = params[1]
         patterns = params[2:]
-        name = patterns[0][0][0]
         for pattern in patterns:
             if len(pattern) == 2:
                 template = pattern[1:]
@@ -55,7 +54,7 @@ class syntax_case(object):
             env = Environment(processer.cenv)
             transformedCode = transformCode(template, bindings, env, bindings)
             return transformedCode[0]
-        raise SyntaxError("syntax-case no case matching %r for %s" % (syntax_list, name))
+        raise SyntaxError("syntax-case no case matching %r" % (syntax_list))
 
 
 import scheme.Globals

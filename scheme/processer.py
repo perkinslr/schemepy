@@ -173,11 +173,9 @@ class Processer(object):
                                 e[params[-1]] = list(iter_args)
                             else:
                                 if (isinstance(args, list) and len(args) != len(params)):
-                                    raise TypeError("%r expected exactly %i arguments, got %i" % (
-                                        self, len(self.ast[0]), len(args)))
+                                    raise TypeError("%r expected exactly %i arguments, got %i" % (self.ast[0], len(params), len(args)))
                                 if (not isinstance(args, list) and 1 != len(params)):
-                                    raise TypeError("%r expected exactly %i arguments, got %i" % (
-                                        self, len(self.ast[0]), 1))
+                                    raise TypeError("%r expected exactly %i arguments, got %i" % (self.ast[0], len(params), len(args)))
                                 iter_args = iter(args)
                                 for idx, item in enumerate(params):
                                     e[item] = iter_args.next()
