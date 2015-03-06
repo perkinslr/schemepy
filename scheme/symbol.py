@@ -42,7 +42,7 @@ class Symbol(unicode):
                 env = None
         if self.lstrip('-').isdigit():
             return int(self)
-        if self.replace('-', '').replace('.', '').replace('e', '').isdigit():
+        if self.replace('-', '').replace('.', '').replace('e', '').isdigit() and not self.startswith('e'):
             return float(self)
 
         if self == '#t':
@@ -57,7 +57,7 @@ class Symbol(unicode):
         try:
             if self.lstrip('-').isdigit():
                 return True
-            if self.replace('-', '').replace('.', '').replace('e', '').isdigit():
+            if self.replace('-', '').replace('.', '').replace('e', '').isdigit() and not self.startswith('e'):
                 return True
             if self == '#t':
                 return True

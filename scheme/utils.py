@@ -209,13 +209,21 @@ def transformCode(code, bindings, env, transformer):
     :param transformer: the transformer for which the SyntaxSymbols are generated
     :return: transformed code
     """
-    o = []
     from scheme.syntax import SyntaxSymbol
+    if isinstance(code, Symbol):
+        if code not in bindings:
+            return [SyntaxSymbol(code).setEnv(env).setSymbol(Symbol(code)).setSyntax(transformer)]
+        else:
+            return [bindings[code]]
+
+    o = []
+
     iterCode = iter(enumerate(code))
     for idx, i in iterCode:
         if len(code) > idx + 1 and code[idx + 1] == '...':
             iterCode.next()
-            o.extend(transformCode(list(bindings.get_all(i)), bindings, env, transformer))
+            l = bindings.get_all(i)
+            o.extend(transformCode(l, bindings, env, transformer))
             continue
         if i == '.':
             idx_p1, i_p1 = iterCode.next()

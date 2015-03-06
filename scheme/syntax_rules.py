@@ -49,7 +49,6 @@ class syntax_rules(object):
             ##processer.ast = transformedCode
             #processer.stackPointer = osp
             return transformedCode
-
         raise SyntaxError("syntax-rules no case matching %r for %s" % (params, self.name))
 
 

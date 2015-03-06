@@ -23,6 +23,9 @@ class Parser(object):
             if self.line == '\n' or self.line == '':
                 self.line = self.file.readline().decode('utf-8')
                 self.line_number += 1
+                if (self.line_number == 1 or self.line_number == 2) and self.line.startswith('#!'):
+                    self.line = self.file.readline().decode('utf-8')
+                    self.line_number+=1
             if self.line == '':
                 break
 

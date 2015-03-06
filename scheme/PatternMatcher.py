@@ -98,7 +98,11 @@ class PatternMatcher(object):
                     if params[0] != self.pattern:
                         raise SyntaxError()
                     return SyntaxEnvironment()
-                return SyntaxEnvironment({self: params[0]})
+                if isinstance(params, list):
+                    r = SyntaxEnvironment({self: params[0]})
+                    return r
+                else:
+                    return SyntaxEnvironment({self: params})
         else:
             if not params:
                 raise SyntaxError()
