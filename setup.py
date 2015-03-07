@@ -10,7 +10,7 @@ import os
 
 
 setup(name='SchemePy',
-      version='1.1.02',
+      version='1.1.04',
       description='R5RS scheme interpreter, supporting hygenic macros and full call/cc',
       author='Logan Perkins',
       author_email='perkins@flyingjnl.net',
@@ -18,7 +18,7 @@ setup(name='SchemePy',
       packages=['scheme'],
       ext_modules = cythonize("scheme/*.pyx") if cythonize else None,
       requires = ['zope.interface'],
-      data_files = [['/usr/share/schemepy/stdlib',[os.path.join('stdlib', i) for i in os.listdir('stdlib')]]],
+      data_files = [[os.path.join('share','schemepy','stdlib'),[os.path.join('stdlib', i) for i in os.listdir('stdlib')]]],
       scripts = ['scripts/schemepy'],
       license = "LGPL",
       keywords = "scheme r5rs define-syntax call/cc",

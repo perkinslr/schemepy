@@ -7,6 +7,7 @@ import re
 
 # noinspection PyAttributeOutsideInit
 class Symbol(unicode):
+    line=0
     def setLine(self, line):
         self.line=line
         return self
@@ -43,6 +44,7 @@ class Symbol(unicode):
             return int(self)
         if self.replace('-', '').replace('.', '').replace('e', '').isdigit() and not self.startswith('e'):
             return float(self)
+
         if self == '#t':
             return True
         if self == '#f':
@@ -55,7 +57,7 @@ class Symbol(unicode):
         try:
             if self.lstrip('-').isdigit():
                 return True
-            if self.replace('-', '').replace('.', '').replace('e', '').isdigit():
+            if self.replace('-', '').replace('.', '').replace('e', '').isdigit() and not self.startswith('e'):
                 return True
             if self == '#t':
                 return True
@@ -82,9 +84,7 @@ class Symbol(unicode):
         raise NameError(u"Symbol '%s' undefined in enclosing environments" % self)
     def __repr__(self):
         if debug.DEBUG:
-            if hasattr(self, 'line'):
-                return '<Symbol %s (line %i)>' % (self, self.line)
-            return '<Symbol %s>' % (self)
+            return '<Symbol %s (line %i)>' % (self, self.line)
         return str(self)
     def __bool__(self):
         if self.isBound(None):
