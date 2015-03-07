@@ -44,7 +44,7 @@ class SimpleProcedure(object):
             c = deepcopy([i])
             processer.pushStack(c)
             icd = processer.callDepth
-            retval = processer.doProcess(c, env)
+            retval = processer.process(c, env)
             while icd < processer.callDepth:
                 processer.popStackN()
             processer.popStack(retval)

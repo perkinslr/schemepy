@@ -12,17 +12,22 @@ class define(object):
         pass
     def __call__(self, processer, params):
         if not isinstance(params[0], list):
+            print 15, params
             env = processer.cenv.parent
             name = params[0]
+            if not isinstance(name, Symbol):
+                name = processer.callStack.queue[-1][0][0][1]
             processer.stackPointer=2
             initialCallDepth = processer.callDepth
             processer.pushStack(params[1:])
-            value = processer.doProcess(params[1:], env)
+            value = processer.process(params[1:], env)
+            print(21, value, env, initialCallDepth, processer.callDepth)
             while initialCallDepth < processer.callDepth:
-                processer.popStackN()
+                processer.popStack(value)
+            print(24, env is Globals.Globals, name)
             env[name] = value
             if processer.callDepth:
-                processer.popStack(env[name])
+                processer.popStack(value)
         else:
             name = params[0][0]
             args = params[0][1:]
@@ -36,7 +41,7 @@ class define(object):
                     x = x[0]
                 name = o[-1]
                 retval = [Symbol('define'), name, [Symbol('lambda'), args, [Symbol('begin')] + rest]]
-                processer.doProcess(retval, env)
+                processer.process(retval, env)
             else:
                 env[name] = SimpleProcedure([args] + rest, env).setName(name)
             processer.popStack(None)
@@ -56,7 +61,7 @@ class Set(object):
             initialCallDepth=processer.callDepth
             processer.pushStack(params[1:])
             processer.stackPointer = 2
-            value = processer.doProcess(params[1:], env)
+            value = processer.process(params[1:], env)
             while initialCallDepth < processer.callDepth:
                 processer.popStackN()
             processer.ast[2] = value

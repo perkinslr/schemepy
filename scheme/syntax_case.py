@@ -48,7 +48,7 @@ class syntax_case(object):
                 continue
             processer.pushStack([guard])
             icd = processer.callDepth
-            r = processer.doProcess([guard], processer.cenv)
+            r = processer.process([guard], processer.cenv)
             while processer.callDepth > icd:
                 processer.popStackN()
             processer.popStack(r)
