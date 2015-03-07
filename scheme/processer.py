@@ -84,7 +84,7 @@ class Processer(object):
             raise e
         self.callDepth -= 1
         if rv:
-            if self.stackPointer==len(self.ast):
+            if self.stackPointer>=len(self.ast):
                 self.popStack(retval)
             self.ast[self.stackPointer] = retval
         if debug.DEBUG > 1:
@@ -155,6 +155,12 @@ class Processer(object):
                     else:
                         raise e3
                         print 157, self.ast, self.stackPointer, self.callStack.queue, self.callDepth
+                except Empty as e4:
+                    if hasattr(e4, 'ret'):
+                        return e4.ret
+                    if hasattr(e4, 'retval'):
+                        return e4.retval
+                    raise e4
             return self.ast[-1]
         except Empty as e1:
             LOG(166)
