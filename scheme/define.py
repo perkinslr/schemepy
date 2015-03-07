@@ -14,11 +14,15 @@ class define(object):
         if not isinstance(params[0], list):
             env = processer.cenv.parent
             name = params[0]
+            processer.stackPointer=2
+            initialCallDepth = processer.callDepth
             processer.pushStack(params[1:])
-
-            value = processer.process(params[1:], env)
-            processer.popStack(value)
+            value = processer.doProcess(params[1:], env)
+            while initialCallDepth < processer.callDepth:
+                processer.popStackN()
             env[name] = value
+            if processer.callDepth:
+                processer.popStack(env[name])
         else:
             name = params[0][0]
             args = params[0][1:]
@@ -32,11 +36,10 @@ class define(object):
                     x = x[0]
                 name = o[-1]
                 retval = [Symbol('define'), name, [Symbol('lambda'), args, [Symbol('begin')] + rest]]
-
-                processer.process(retval, env)
+                processer.doProcess(retval, env)
             else:
                 env[name] = SimpleProcedure([args] + rest, env).setName(name)
-        processer.popStack(None)
+            processer.popStack(None)
         # processer.ast[processer.stackPointer]=None
         processer.stackPointer += 1
         return None
@@ -50,9 +53,12 @@ class Set(object):
         if not isinstance(params[0], list):
             env = processer.cenv.parent
             name = params[0]
+            initialCallDepth=processer.callDepth
             processer.pushStack(params[1:])
-            value = processer.process(params[1:], env)
-            processer.popStack(value)
+            processer.stackPointer = 2
+            value = processer.doProcess(params[1:], env)
+            while initialCallDepth < processer.callDepth:
+                processer.popStackN()
             processer.ast[2] = value
             processer.ast[0] = Symbol('set!')
             if not name.isBound(env):

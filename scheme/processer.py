@@ -96,15 +96,26 @@ class Processer(object):
             return self.process(_ast, env, callDepth)
         except callCCBounce as e:
             # noinspection PyUnresolvedReferences
-            return e.ret
-        except Empty as e:
-            if hasattr(e, 'cont'):
-                continuation = e.cont
-                # noinspection PyUnresolvedReferences
-                retval = e.ret
-                self.setContinuation([continuation, retval])
-                return self.doProcess(processer.ast, processer.cenv, 1)
-            raise e
+            continuation=e.continuation
+            callDepth=self.callDepth
+            icd = self.initialCallDepth
+            self.dumpStack()
+            self.callStack.queue=deepcopy(continuation['callStack'])
+            self.callDepth=continuation['callDepth']
+            self.initialCallDepth=0
+
+            self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
+            #while (self.stackPointer!=continuation['stackPointer'] or len(self.ast)<=self.stackPointer) and self.callDepth:
+            while self.callDepth > continuation['targetCallDepth'] or ((self.stackPointer!=continuation['stackPointer'] or len(self.ast)<=self.stackPointer) and self.callDepth):
+                try:
+                    self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
+                    self.callDepth -= 1
+                except Empty:
+                    return e.retval
+            self.stackPointer = continuation['stackPointer']
+            self.ast[self.stackPointer]=e.retval
+            #self.popStack(e.retval)
+            return self.doProcess(self.ast, self.cenv, continuation['initialCallDepth'])
     def process(self, _ast, env=None, callDepth=None):
         global current_processer
         current_processer = self

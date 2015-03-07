@@ -46,11 +46,14 @@ class syntax_case(object):
             bindings = PatternMatcher(pattern, literals).match(syntax_list)
             if bindings is None:
                 continue
-            processer.pushStackN()
-            if not processer.process([guard], processer.cenv):
+            processer.pushStack([guard])
+            icd = processer.callDepth
+            r = processer.doProcess([guard], processer.cenv)
+            while processer.callDepth > icd:
                 processer.popStackN()
+            processer.popStack(r)
+            if not r:
                 continue
-            processer.popStackN()
             env = Environment(processer.cenv)
             transformedCode = transformCode(template, bindings, env, bindings)
             return transformedCode[0]

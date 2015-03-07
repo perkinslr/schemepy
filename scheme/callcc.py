@@ -14,18 +14,20 @@ class callcc():
         # raise Exception()
         continuation = processer.continuation
         continuation['initialCallDepth'] += 1
+        continuation['targetCallDepth'] = processer.callDepth
         callback = callccCallback(continuation)
         # processer.popStack([ast[0], callback])
         # processer.stackPointer-=1
         if Procedure in providedBy(ast[0]):
-            processer.pushStackN()
+            cd = processer.callDepth
+            processer.pushStack([ast[0], callback])
             r = processer.process([[ast[0], callback]], processer.cenv)
             processer.popStackN()
         elif Macro in providedBy(ast[0]):
             r = ast[0](processer, [callback])
-            processer.pushStackN()
+            processer.pushStack(r)
             r = processer.process(r, processer.cenv)
-            processer.popStackN()
+            processer.popStack(r)
         else:
             r = ast[0](callback)
         return r
@@ -37,15 +39,15 @@ class callccCallback():
         self.env = Globals
         self.continuation = continuation
     def __call__(self, processer, ast):
-        p.dumpStack()
         processer.dumpStack()
-        processer.setContinuation([self.continuation, ast[0]])
         # if processer.callStack.queue:
-        # processer.callStack.queue[-1][2]=self.continuation['stackPointer']
+        #processer.callStack.queue[-1][2]=self.continuation['stackPointer']
         e = callCCBounce()
-        e.ret = processer.process(processer.ast, processer.cenv,
-                                  max(processer.initialCallDepth, self.continuation['initialCallDepth'] - 1))
-        processer.dumpStack()
+        e.continuation=self.continuation
+        e.retval = ast[0]
+        #e.ret = processer.process(processer.ast, processer.cenv,
+        #                          max(processer.initialCallDepth, self.continuation['initialCallDepth'] - 1))
+        #processer.dumpStack()
         # p.dumpStack()
         raise e
 
