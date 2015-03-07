@@ -14,9 +14,9 @@ class begin(object):
         env = processer.cenv.parent
         retval = None
         for param in params:
-            processer.pushStackN()
-            retval = processer.process([param], env, processer.callDepth)
-            processer.popStackN()
+            processer.pushStack([param])
+            retval = processer.doProcess([param], env, processer.callDepth)
+            processer.popStack(retval)
         processer.popStack(retval)
         processer.stackPointer += 1
         return
