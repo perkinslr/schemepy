@@ -43,7 +43,13 @@ class syntax_rules(object):
             if bindings is None:
                 continue
             env = Environment(self.env)
-            transformedCode = transformCode(template, bindings, env, self)[0]
+            l = {}
+            l.update(globals())
+            l.update(locals())
+            import code
+            #code.InteractiveConsole(locals=l).interact()
+            transformedCode = transformCode(template, bindings, env, self)
+            print 52, transformedCode
             #osp = processer.stackPointer
             #processer.popStack(transformedCode)
             ##processer.ast = transformedCode

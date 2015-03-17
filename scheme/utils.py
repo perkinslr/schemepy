@@ -200,7 +200,12 @@ def expand_quotes(lst):
     return expand_syntax(lst)
 
 
-def transformCode(code, bindings, env, transformer):
+def getUniqueSymbol(c):
+    import time, hashlib
+    return Symbol(str(c) + hashlib.md5(str(time.time())).hexdigest())
+    
+
+def transformCode(code, bindings, env, transformer, localSymbols = None):
     """
     Recursive function to build the transformed code
     :param code: code to transform
@@ -209,36 +214,55 @@ def transformCode(code, bindings, env, transformer):
     :param transformer: the transformer for which the SyntaxSymbols are generated
     :return: transformed code
     """
-    from scheme.syntax import SyntaxSymbol
-    if isinstance(code, Symbol):
-        if code not in bindings:
-            return [SyntaxSymbol(code).setEnv(env).setSymbol(Symbol(code)).setSyntax(transformer)]
+    from scheme.macro import MacroSymbol
+    if localSymbols is None:
+        localSymbols = {}
+    if not isinstance(code, list):
+        if code in bindings:
+            print 222
+            return code
+        try:
+            code.toObject(env)
+            print 224
+            return MacroSymbol(code).setEnv(env)
+        except:
+            pass
+        if c not in localSymbols:
+                localSymbols[c]=getUniqueSymbol(c)
+        return localSymbols[c]
+    o=[]
+    itercode=iter(enumerate(code))
+    for idx, c in itercode:
+        if isinstance(c, list):
+            print 237, c
+            newC=transformCode(c, bindings, env, transformer, localSymbols)
+            print 239, newC
+            o.append(newC)
         else:
-            return [bindings[code]]
-
-    o = []
-
-    iterCode = iter(enumerate(code))
-    for idx, i in iterCode:
-        if len(code) > idx + 1 and code[idx + 1] == '...':
-            iterCode.next()
-            l = bindings.get_all(i)
-            o.extend(transformCode(l, bindings, env, transformer))
-            continue
-        if i == '.':
-            idx_p1, i_p1 = iterCode.next()
-            o_p1 = transformCode(code[idx_p1].toObject(bindings), bindings, env, transformer)
-            o.extend(o_p1)
-            continue
-        if isinstance(i, (list, tuple)):
-            o.append(transformCode(i, bindings, env, transformer))
-        else:
-            if i not in bindings:
-                o.append(SyntaxSymbol(i).setEnv(env).setSymbol(Symbol(i)).setSyntax(transformer))
-            else:
-                o.append(bindings[i])
-                # if i == '...' and code[idx-1] in bindings:
-                # o.pop(-1)
-                # o.pop(-1)
-                # o.extend(bindings[code[idx - 1]])
+            if len(code) > idx + 1 and code[idx+1]=='...':
+                itercode.next()
+                print 226, code
+                print len(bindings[c])
+                if isinstance(bindings[c], list):
+                    o.extend(bindings[c])
+                else:
+                    o.append(bindings[c])
+                continue
+            if c in bindings:
+                print 245
+                o.append(bindings[c])
+                continue
+            try:
+                c.toObject(env)
+                o.append(MacroSymbol(c).setEnv(env))
+                print 251
+                continue
+            except Exception as e:
+                print e
+                pass
+            if c not in localSymbols:
+                localSymbols[c]=getUniqueSymbol(c)
+            print 250, localSymbols[c]
+            o.append(localSymbols[c])
+    print o
     return o
