@@ -219,11 +219,9 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
         localSymbols = {}
     if not isinstance(code, list):
         if code in bindings:
-            print 222
             return code
         try:
             code.toObject(env)
-            print 224
             return MacroSymbol(code).setEnv(env)
         except:
             pass
@@ -234,14 +232,11 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
     itercode=iter(enumerate(code))
     for idx, c in itercode:
         if isinstance(c, list):
-            print 237, c
             newC=transformCode(c, bindings, env, transformer, localSymbols)
-            print 239, newC
             o.append(newC)
         else:
             if len(code) > idx + 1 and code[idx+1]=='...':
                 itercode.next()
-                print 226, code
                 print len(bindings[c])
                 if isinstance(bindings[c], list):
                     o.extend(bindings[c])
@@ -249,20 +244,17 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
                     o.append(bindings[c])
                 continue
             if c in bindings:
-                print 245
                 o.append(bindings[c])
                 continue
             try:
                 c.toObject(env)
                 o.append(MacroSymbol(c).setEnv(env))
-                print 251
                 continue
             except Exception as e:
                 print e
                 pass
             if c not in localSymbols:
                 localSymbols[c]=getUniqueSymbol(c)
-            print 250, localSymbols[c]
             o.append(localSymbols[c])
     print o
     return o
