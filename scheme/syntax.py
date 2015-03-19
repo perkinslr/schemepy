@@ -2,7 +2,7 @@ from __future__ import division, unicode_literals
 from Queue import Empty
 from scheme.symbol import Symbol
 from zope.interface import classProvides, implements, implementer, provider
-from scheme.macro import Macro
+from scheme.macro import Macro, MacroSymbol
 from scheme.Globals import Globals
 __author__ = 'perkins'
 
@@ -24,26 +24,54 @@ class SyntaxSymbol(Symbol):
     def setSymbol(self, symbol):
         self.symbol = symbol
         return self
+    def setAltEnv(self, env):
+        self.altEnv = env
+        return self
     def toObject(self, env):
+        # print 31, self, env
+        if not isinstance(self.symbol, Symbol):
+            return self.symbol
         try:
             possibleEnv = Symbol.getEnv(self, env)
+            # print 36
         except NameError:
-            possibleEnv = None
-        if possibleEnv:
+            if hasattr(self, 'altEnv'):
+                # print 38
+                try:
+                    possibleEnv = Symbol.getEnv(self.symbol, self.altEnv)
+                    # print 40, possibleEnv
+                    return Symbol.toObject(self.symbol, self.altEnv)
+                except NameError:
+                    possibleEnv = None
+            else:
+                possibleEnv = None
+        # print 44, possibleEnv
+        if possibleEnv is not None:
             keys = possibleEnv.keys()
             if self in keys:
                 possibleSymbol = keys[keys.index(self)]
                 if isinstance(possibleSymbol, SyntaxSymbol) and possibleSymbol.transformer == self.transformer:
                     return possibleEnv[self]
-        if not isinstance(self.symbol, Symbol):
-            return self.symbol
-        return self.symbol.toObject(self.env)
-    def getEnv(self, env):
         try:
-            possibleEnv = Symbol.getEnv(self, env)
+            return self.symbol.toObject(self.env)
+        except NameError as e:
+            if hasattr(self, 'altEnv'):
+                # print 59
+                return self.symbol.toObject(self.altEnv)
+            if possibleEnv:
+                import scheme.processer as p
+                return MacroSymbol(self.symbol).setObj(possibleEnv[self])
+            raise e
+    def getEnv(self, env):
+        possibleEnv=None
+        try:
+            possibleEnv = Symbol.getEnv(self.symbol, env)
         except NameError:
-            possibleEnv = None
-        if possibleEnv:
+            try:
+                possibleEnv = Symbol.getEnv(self.symbol, self.altEnv)
+            except NameError:
+                pass
+        if possibleEnv is not None:
             keys = possibleEnv.keys()
             if self in keys:
                 possibleSymbol = keys[keys.index(self)]

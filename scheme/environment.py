@@ -18,6 +18,10 @@ class Environment(dict):
         return self[item]
     def __setitem__(self, key, value):
         if isinstance(key, (list, tuple)):
+            if len(key)==1:
+                self[key[0]]=value
+                return
+            print key, value
             if len(key) != len(value):
                 raise SyntaxError("Setting multiple symbols require the proper number of values")
             for idx, i in enumerate(key):
@@ -33,6 +37,9 @@ class Environment(dict):
 
 
 class SyntaxEnvironment(dict):
+    def __init__(self, *args, **kw):
+        super(SyntaxEnvironment, self).__init__(*args, **kw)
+        self.env=self
     parent = None
     def walk(self, pairs=False):
         items = self.iteritems()
