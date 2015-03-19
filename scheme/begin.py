@@ -1,4 +1,4 @@
-__author__ = 'jeanie'
+__author__ = 'lperkins2'
 
 from zope.interface import implements
 
@@ -13,10 +13,15 @@ class begin(object):
     def __call__(self, processer, params):
         env = processer.cenv.parent
         retval = None
-        for param in params:
+        for idx, param in enumerate(params):
+            processer.stackPointer+=1
+            icd = processer.callDepth
             processer.pushStack([param])
-            retval = processer.doProcess([param], env, processer.callDepth)
+            retval = processer.process([param], env, processer.callDepth)
+#            while processer.callDepth > icd:
+#                processer.popStackN()
             processer.popStack(retval)
+            params[idx]=retval
         processer.popStack(retval)
         processer.stackPointer += 1
         return
