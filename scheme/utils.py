@@ -203,7 +203,8 @@ def expand_quotes(lst):
 def getUniqueSymbol(c):
     import time, hashlib
     return Symbol(str(c) + hashlib.md5(str(time.time())).hexdigest())
-    
+
+b=[]
 
 def transformCode(code, bindings, env, transformer, localSymbols = None):
     """
@@ -214,20 +215,21 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
     :param transformer: the transformer for which the SyntaxSymbols are generated
     :return: transformed code
     """
+    b.append(bindings)
     from scheme.macro import MacroSymbol
     if localSymbols is None:
         localSymbols = {}
     if not isinstance(code, list):
         if code in bindings:
-            return code
+            return bindings.get_all(code)
         try:
             code.toObject(env)
             return MacroSymbol(code).setEnv(env)
         except:
             pass
-        if c not in localSymbols:
-                localSymbols[c]=getUniqueSymbol(c)
-        return localSymbols[c]
+        if code not in localSymbols:
+                localSymbols[code]=getUniqueSymbol(code)
+        return localSymbols[code]
     o=[]
     itercode=iter(enumerate(code))
     for idx, c in itercode:
@@ -236,15 +238,16 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
             o.append(newC)
         else:
             if len(code) > idx + 1 and code[idx+1]=='...':
+                print c
                 itercode.next()
-                print len(bindings[c])
-                if isinstance(bindings[c], list):
-                    o.extend(bindings[c])
-                else:
-                    o.append(bindings[c])
+                o.extend(bindings.get_all(c))
+                # if isinstance(bindings[c], list):
+                #     o.extend(bindings.get_all(c))
+                # else:
+                #     o.extend(bindings.get_all(c))
                 continue
             if c in bindings:
-                o.append(bindings[c])
+                o.append(bindings.get_all(c))
                 continue
             try:
                 c.toObject(env)
