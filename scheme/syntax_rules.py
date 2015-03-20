@@ -46,15 +46,17 @@ class syntax_rules(object):
             l = {}
             l.update(globals())
             l.update(locals())
-            import code
+            print 49
+            #import code
             #code.InteractiveConsole(locals=l).interact()
             transformedCode = transformCode(template, bindings, env, self)
             #osp = processer.stackPointer
             #processer.popStack(transformedCode)
             ##processer.ast = transformedCode
             #processer.stackPointer = osp
+            print 56, transformedCode
             if len(transformedCode)==1:
-				return transformedCode[0]
+                return transformedCode[0]
             return transformedCode
         raise SyntaxError("syntax-rules no case matching %r for %s" % (params, self.name))
 
