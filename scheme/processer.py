@@ -150,7 +150,14 @@ class Processer(object):
                 except TypeError as e3:
                     print(162)
                     if not callable(self.ast[0]):
-                        self.popStack(self.ast[-1])
+			try:
+	                        self.popStack(self.ast[-1])
+			except Empty as e5:
+				if hasattr(e5, 'ret'):
+					return e5.ret
+				if hasattr(e5, 'retval'):
+					return e5.retval
+				raise e5
                         #return self.doProcess(self.ast, self.cenv, 0, True)
                     else:
                         raise e3
