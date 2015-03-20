@@ -46,7 +46,6 @@ class syntax_rules(object):
             l = {}
             l.update(globals())
             l.update(locals())
-            print 49
             #import code
             #code.InteractiveConsole(locals=l).interact()
             transformedCode = transformCode(template, bindings, env, self)
