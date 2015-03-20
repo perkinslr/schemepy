@@ -204,7 +204,7 @@ def getUniqueSymbol(c):
     import time, hashlib
     return Symbol(str(c) + hashlib.md5(str(time.time())).hexdigest())
 
-b=[]
+B=[]
 
 def transformCode(code, bindings, env, transformer, localSymbols = None):
     """
@@ -215,7 +215,7 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
     :param transformer: the transformer for which the SyntaxSymbols are generated
     :return: transformed code
     """
-    b.append(bindings)
+    B.append(bindings)
     from scheme.macro import MacroSymbol
     if localSymbols is None:
         localSymbols = {}
@@ -240,7 +240,12 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
             if len(code) > idx + 1 and code[idx+1]=='...':
                 print c
                 itercode.next()
-                o.extend(bindings.get_all(c))
+                b = bindings.get_all(c)
+                if isinstance(b, list):
+                    o.extend(b)
+                else:
+                    o.append(b)
+                #o.extend(bindings.get_all(c))
                 # if isinstance(bindings[c], list):
                 #     o.extend(bindings.get_all(c))
                 # else:

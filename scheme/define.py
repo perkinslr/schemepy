@@ -12,7 +12,6 @@ class define(object):
         pass
     def __call__(self, processer, params):
         if not isinstance(params[0], list):
-            print 15, params
             env = processer.cenv.parent
             name = params[0]
             if not isinstance(name, Symbol):
@@ -21,10 +20,8 @@ class define(object):
             initialCallDepth = processer.callDepth
             processer.pushStack(params[1:])
             value = processer.process(params[1:], env)
-            print(21, value, env, initialCallDepth, processer.callDepth)
             while initialCallDepth < processer.callDepth:
                 processer.popStack(value)
-            print(24, env is Globals.Globals, name)
             env[name] = value
             if processer.callDepth:
                 processer.popStack(value)
