@@ -73,8 +73,6 @@ def add_globals(env):
         'len?': len,
         'map': map,
         'in': lambda x, y: x in y,
-        'open-input-file': open, 'close-input-port': lambda p: p.file.close(),
-        'open-output-file': lambda f: open(f, 'w'), 'close-output-port': lambda p: p.close(),
         'bool': bool,
         'eval': scheme.eval.Exec,
         'last': last,
