@@ -151,9 +151,9 @@ class Processer(object):
                         except Empty as e5:
                             if hasattr(e5, 'ret'):
                                 return e5.ret
-                        if hasattr(e5, 'retval'):
-                            return e5.retval
-                        raise e5
+                            if hasattr(e5, 'retval'):
+                                return e5.retval
+                            raise e5
                         #return self.doProcess(self.ast, self.cenv, 0, True)
                     else:
                         raise e3
