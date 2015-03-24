@@ -3,6 +3,8 @@
 
 
 # ############### Tests for lis.py and lispy.py
+import sys,os
+sys.path.append(os.getcwd())
 import scheme.symbol
 import scheme.procedure
 
