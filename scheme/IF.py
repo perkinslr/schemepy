@@ -24,7 +24,7 @@ class IF(object):
             processer.stackPointer = 1
             processer.pushStack(conditional)
             # noinspection PyTypeChecker
-            ret = processer.__class__(processer).process([Symbol('Begin')] + [conditional], env)
+            ret = processer.process([Symbol('Begin')] + [conditional], env)
             processer.popStack(ret)
             processer.stackPointer = old_stack_pointer
             if ret:
