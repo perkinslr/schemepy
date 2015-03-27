@@ -30,7 +30,7 @@ class Lambda(object):
 
         ret = MacroSymbol('lambda:%s' % t).setEnv(
             {('lambda:%s' % t): SimpleProcedure([args] + rest, processer.cenv).setName("lambda:%s" % t)})
-        lambdas.append(ret)
+#        lambdas.append(ret)
         return ret
 
 

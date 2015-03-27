@@ -79,7 +79,7 @@ class Processer(object):
                 retval = MacroSymbol(retval).setObj(retval)
             else:
                 retval = MacroSymbol(retval).setEnv({retval: retval.toObject(self.cenv)})
-        if debug.DEBUG:
+        if debug.DEBUG>10:
             discarded_frames.append((self.ast, self.cenv, self.stackPointer))
         try:
             self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()

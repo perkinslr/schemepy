@@ -1,6 +1,7 @@
 # noinspection PyTypeChecker
 
 
+
 class Environment(dict):
     def __init__(self, parent, *args, **kw):
         """
