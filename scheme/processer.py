@@ -17,8 +17,8 @@ discarded_frames = []
 
 class Processer(object):
     def __init__(self, parent=None):
-        # if current_processer:
-        # raise Exception()
+#        if current_processer:
+#            raise Exception()
         self.children = []
         self.parent = parent
         if parent:
