@@ -12,9 +12,7 @@ from scheme.macro import Macro
 from scheme.procedure import Procedure
 import cStringIO
 
-def setDebug(b):
-    debug.DEBUG = b
-
+from scheme.debug import setDebug, getDebug
 
 cons = lambda x, y: [x] + y
 

@@ -83,7 +83,7 @@ class Symbol(unicode):
             return Globals
         raise NameError(u"Symbol '%s' undefined in enclosing environments" % self)
     def __repr__(self):
-        if debug.DEBUG:
+        if debug.getDebug('symbols'):
             return '<Symbol %s (line %i)>' % (self, self.line)
         return str(self)
     def __bool__(self):

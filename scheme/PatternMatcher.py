@@ -58,7 +58,7 @@ class PatternMatcher(object):
             pass
         except AttributeError:
             pass
-        if scheme.debug.DEBUG > 1:
+        if scheme.debug.getDebug('patternMatcher'):
             import traceback
             traceback.print_exc()
     def __match(self, params):
