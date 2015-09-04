@@ -21,7 +21,7 @@ from scheme.utils import transformCode
 
 
 
-
+import scheme.debug
 
 
 class syntax_rules(object):
@@ -53,7 +53,8 @@ class syntax_rules(object):
             #processer.popStack(transformedCode)
             ##processer.ast = transformedCode
             #processer.stackPointer = osp
-            print 56, transformedCode
+            if scheme.debug.getDebug('syntax'):
+              print 56, transformedCode
             if len(transformedCode)==1:
                 return transformedCode[0]
             return transformedCode

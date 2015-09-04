@@ -1,6 +1,7 @@
 # noinspection PyTypeChecker
 
 
+
 class Environment(dict):
     def __init__(self, parent, *args, **kw):
         """
@@ -8,11 +9,6 @@ class Environment(dict):
         :rtype : Environment
         """
         self.parent = parent
-        if parent is not None and type(parent) == Environment:
-            if hasattr(parent, 'children'):
-                parent.children.append(self)
-            else:
-                parent.children = [self]
         super(Environment, self).__init__(*args, **kw)
     def __call__(self, item):
         return self[item]

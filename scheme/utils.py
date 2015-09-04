@@ -104,17 +104,22 @@ def copy_with_quasiquote(processer, env, lst, last_lst=None, last_idx=None, o_st
                 return retval, True
             if lst == ',':
                 qq_target = last_lst.pop(last_idx + 1)
-                retval = processer.__class__(processer).process([qq_target], env)
+                processer.pushStack(qq_target)
+                retval = processer.process([qq_target], env)
+                processer.popStack(retval, wrap=False)
                 return retval, False
             if last_idx == 0 and lst.isBound(Globals) and isinstance(lst.toObject(Globals), unquote_splicing):
                 qq_target = last_lst.pop(last_idx + 1)
-                retval = processer.__class__(processer).process([qq_target], env)
+                processer.pushStack(qq_target)
+                retval = processer.process([qq_target], env)
+                processer.popStack(retval, wrap=False)
                 o_stack.extend(retval)
                 return retval, 2
             if lst == ',@':
                 qq_target = last_lst.pop(last_idx + 1)
-
-                retval = processer.__class__(processer).process([qq_target], env)
+                processer.pushStack(qq_target)
+                retval = processer.process([qq_target], env)
+                processer.popStack(retval, wrap=False)
                 return retval, 3
             return MacroSymbol(lst).setEnv({lst: lst}), False
         return lst, False
@@ -215,7 +220,7 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
     :param transformer: the transformer for which the SyntaxSymbols are generated
     :return: transformed code
     """
-    B.append(bindings)
+#    B.append(bindings)
     from scheme.macro import MacroSymbol
     if localSymbols is None:
         localSymbols = {}
@@ -253,7 +258,7 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
                 o.append(MacroSymbol(c).setEnv(env))
                 continue
             except Exception as e:
-                print e
+                #print e
                 pass
             if c not in localSymbols:
                 localSymbols[c]=getUniqueSymbol(c)

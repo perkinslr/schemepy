@@ -11,7 +11,7 @@ from zope.interface import providedBy
 from scheme.symbol import Symbol
 from Queue import LifoQueue, Empty
 from scheme import debug
-
+from scheme.debug import LOG
 
 current_processer = None
 discarded_frames = []
@@ -19,8 +19,8 @@ discarded_frames = []
 
 class Processer(object):
     def __init__(self, parent=None):
-        # if current_processer:
-        # raise Exception()
+#        if current_processer:
+#            raise Exception()
         self.children = []
         self.parent = parent
         if parent:
@@ -32,6 +32,7 @@ class Processer(object):
         self.stackPointer = 0
         self.cenv = None
         self.initialCallDepth = 0
+        self.shouldAbort = None
     def getContinuation(self):
         if self.parent:
             pc = self.parent.continuation
@@ -55,10 +56,8 @@ class Processer(object):
         self.ast, self.cenv, self.stackPointer, garbage = self.callStack.get_nowait()
         self.callDepth -= 1
     def pushStack(self, ast):
-        if debug.DEBUG > 1:
+        if debug.getDebug('pushStack'):
             import traceback
-
-
             traceback.print_stack()
             print 'push', self.ast, self.stackPointer
         self.callStack.put((self.ast, self.cenv, self.stackPointer, 1))
@@ -67,7 +66,7 @@ class Processer(object):
         self.stackPointer = 0
         self.callDepth += 1
     def popStack(self, retval, wrap=True):
-        if debug.DEBUG > 1:
+        if debug.getDebug('popStack'):
             import traceback
 
 
@@ -82,7 +81,7 @@ class Processer(object):
                 retval = MacroSymbol(retval).setObj(retval)
             else:
                 retval = MacroSymbol(retval).setEnv({retval: retval.toObject(self.cenv)})
-        if debug.DEBUG:
+        if debug.getDebug('discardedFrames'):
             discarded_frames.append((self.ast, self.cenv, self.stackPointer))
         try:
             self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
@@ -94,8 +93,7 @@ class Processer(object):
             if self.stackPointer >= len(self.ast):
                 self.popStack(retval)
             self.ast[self.stackPointer] = retval
-        if debug.DEBUG > 1:
-            print self.ast, self.stackPointer
+        LOG('popStack', self.ast, self.stackPointer)
     def dumpStack(self):
         while self.callDepth > 0 and self.callStack.queue:
             self.popStackN()
@@ -108,8 +106,6 @@ class Processer(object):
     def doProcess(self, _ast, env=None, callDepth=None, ccc=False, quotesExpanded=False):
         if not ccc:
             self.dumpStack()
-        def LOG(*stuff):
-            print  stuff
         try:
             return self.process(_ast, env, callDepth, quotesExpanded)
         except callCCBounce as e:
@@ -122,11 +118,11 @@ class Processer(object):
             self.callStack.queue = deepcopy(continuation['callStack'])
             self.callDepth = continuation['callDepth']
             self.initialCallDepth = 0
-            LOG(109, self.ast)
+            LOG('call/cc bounce', 109, self.ast)
             self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
             # self.callStack.queue.pop(0)
             #self.callDepth-=1
-            LOG(111, self.ast)
+            LOG('call/cc bounce', self.ast)
             seek = True
             while True:
                 for i in xrange(len(self.ast)):
@@ -222,6 +218,8 @@ class Processer(object):
                 else:
                     return this
             while True:
+                if self.shouldAbort:
+                    raise self.shouldAbort
                 if self.stackPointer >= len(self.ast) and self.callDepth <= self.initialCallDepth:
                     return self.ast[-1]
                 if self.stackPointer >= len(self.ast):

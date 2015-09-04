@@ -45,7 +45,7 @@ class let(object):
         vals = [processer.process(i[1], Environment(env)) for i in bindings]
         proc = SimpleProcedure([vars_] + params[2:], env).setName(name)
         env[name] = proc
-        LOG(32, [proc] + vals)
+        LOG('LET', 32, [proc] + vals)
         ret = processer.process([[proc] + vals])
         processer.popStack(ret)
         processer.stackPointer += 1

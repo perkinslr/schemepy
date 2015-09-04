@@ -100,7 +100,7 @@ class SimpleMacro(object):
             env[self.ast[0]] = [Symbol('quote'), args]
         o = []
         retval = copy_with_quasiquote(processer, env, deepcopy(self.ast[1:]), o_stack=o)[0]
-        LOG("macro:79", retval)
+        LOG("macro", retval)
         retval = processer.process(retval, processer.cenv)
         processer.popStack(retval)
         return

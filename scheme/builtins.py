@@ -12,9 +12,7 @@ from scheme.macro import Macro
 from scheme.procedure import Procedure
 import cStringIO
 
-def setDebug(b):
-    debug.DEBUG = b
-
+from scheme.debug import setDebug, getDebug
 
 cons = lambda x, y: [x] + y
 
@@ -73,8 +71,6 @@ def add_globals(env):
         'len?': len,
         'map': map,
         'in': lambda x, y: x in y,
-        'open-input-file': open, 'close-input-port': lambda p: p.file.close(),
-        'open-output-file': lambda f: open(f, 'w'), 'close-output-port': lambda p: p.close(),
         'bool': bool,
         'eval': scheme.eval.Exec,
         'last': last,

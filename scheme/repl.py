@@ -34,7 +34,7 @@ def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
                     traceback.print_exc()
                     raise e
             except Exception as e:
-                if debug.DEBUG:
+                if debug.getDebug('repl'):
                     import traceback
                     print traceback.format_exc()
                     print processer.ast

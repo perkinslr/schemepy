@@ -7,7 +7,7 @@ from token import Token
 
 
 class Parser(object):
-    tokenizer = r"""\s*(#`|#,@|#,|#'|,@|\;|[('`,)]|"(?:[\\].|[^\\"])*"|;.*|[^\s('"`,;)]*)(.*)"""
+    tokenizer = r"""\s*(#`|#,@|#,|#'|,@|[('`,)]|"(?:[\\].|;|[^\\"])*"|;.*|[^\s('"`,;)]*)(.*)"""
     eof_object = Symbol('#<eof-object>')
     eol_object = Symbol('#<eol-object>')
     @classmethod
