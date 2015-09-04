@@ -238,18 +238,12 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
             o.append(newC)
         else:
             if len(code) > idx + 1 and code[idx+1]=='...':
-                print c
                 itercode.next()
-                b = bindings.get_all(c)
-                if isinstance(b, list):
-                    o.extend(b)
+                tmp = bindings.get_all(c)
+                if isinstance(tmp, list):
+                    o.extend(tmp)
                 else:
-                    o.append(b)
-                #o.extend(bindings.get_all(c))
-                # if isinstance(bindings[c], list):
-                #     o.extend(bindings.get_all(c))
-                # else:
-                #     o.extend(bindings.get_all(c))
+                    o.append(tmp)
                 continue
             if c in bindings:
                 o.append(bindings.get_all(c))
@@ -264,5 +258,4 @@ def transformCode(code, bindings, env, transformer, localSymbols = None):
             if c not in localSymbols:
                 localSymbols[c]=getUniqueSymbol(c)
             o.append(localSymbols[c])
-    print o
     return o

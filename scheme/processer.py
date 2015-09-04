@@ -106,7 +106,6 @@ class Processer(object):
         self.callDepth = 0
     tcd = 0
     def doProcess(self, _ast, env=None, callDepth=None, ccc=False, quotesExpanded=False):
-        print 102
         if not ccc:
             self.dumpStack()
         def LOG(*stuff):
