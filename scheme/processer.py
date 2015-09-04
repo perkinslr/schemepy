@@ -5,6 +5,8 @@ from scheme.environment import Environment
 from scheme.procedure import Procedure, SimpleProcedure
 from scheme.macro import Macro, MacroSymbol
 from scheme.utils import deepcopy, expand_quotes
+import scheme.utils
+print scheme.utils
 from zope.interface import providedBy
 from scheme.symbol import Symbol
 from Queue import LifoQueue, Empty
@@ -38,7 +40,8 @@ class Processer(object):
         return dict(env=self.cenv, callDepth=self.callDepth + pc['callDepth'],
                     callStack=deepcopy(self.callStack.queue) + pc['callStack'],
                     initialCallDepth=self.initialCallDepth + pc['initialCallDepth'], stackPointer=self.stackPointer)
-    def setContinuation(self, (continuation, retval)):
+    def setContinuation(self, args):
+        continuation, retval = args
         self.callStack.queue[:] = deepcopy(continuation['callStack'])
         self.callDepth = continuation['callDepth']
         self.cenv = continuation['env']
@@ -102,13 +105,14 @@ class Processer(object):
         self.ast = None
         self.callDepth = 0
     tcd = 0
-    def doProcess(self, _ast, env=None, callDepth=None, ccc=False):
+    def doProcess(self, _ast, env=None, callDepth=None, ccc=False, quotesExpanded=False):
+        print 102
         if not ccc:
             self.dumpStack()
         def LOG(*stuff):
             print  stuff
         try:
-            return self.process(_ast, env, callDepth)
+            return self.process(_ast, env, callDepth, quotesExpanded)
         except callCCBounce as e:
             print >> open('/tmp/ccc.log', 'a'), (e.continuation, e.retval)
             # noinspection PyUnresolvedReferences
@@ -172,7 +176,7 @@ class Processer(object):
                 self.dumpStack()
                 return e1.retval
             raise e1
-    def process(self, _ast, env=None, callDepth=None):
+    def process(self, _ast, env=None, callDepth=None, quotesExpanded=True):
         global current_processer
         current_processer = self
         if _ast == [[]]:
@@ -197,7 +201,8 @@ class Processer(object):
             else:
                 self.cenv = env
             self.ast = _ast
-            self.ast = expand_quotes(self.ast)
+            if not quotesExpanded:
+                self.ast = expand_quotes(self.ast)
             self.stackPointer = 0;
             if not isinstance(self.ast, list):
                 if isinstance(self.ast, Symbol):

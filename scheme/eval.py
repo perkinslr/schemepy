@@ -9,12 +9,12 @@ import utils
 p = processer.processer
 
 
-def Eval(obj):
+def Eval(obj, quotesExpanded=False):
     if isinstance(obj, (str, unicode)):
         obj = cStringIO.StringIO(obj)
     ast = parser.Parser(obj).ast
     try:
-        ret = p.doProcess(ast)
+        ret = p.doProcess(ast, quotesExpanded=quotesExpanded)
     except Empty as e:
         # noinspection PyUnresolvedReferences
         ret = e.ret

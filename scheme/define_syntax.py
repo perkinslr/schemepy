@@ -18,6 +18,7 @@ class DefinedSyntax(object):
         syntax_object = SyntaxSymbol([processer.ast[0]] + params).setSymbol([processer.ast[0]] + params)
         osp = processer.stackPointer
         o = self.transformer(processer, [syntax_object])
+        print 21, o
         if o is not None:
             processer.popStack(o)
         processer.stackPointer = osp
