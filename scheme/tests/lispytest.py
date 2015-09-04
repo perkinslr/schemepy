@@ -3,8 +3,6 @@
 
 
 # ############### Tests for lis.py and lispy.py
-import sys,os
-sys.path.append(os.getcwd())
 import scheme.symbol
 import scheme.procedure
 
@@ -125,6 +123,7 @@ lispy_tests = [
     ('''(when (< 0 5) "true")''', "true"),
     ('''(when (> 0 5) "true")''', False),
     ('''(let-syntax ((s (lambda (x) #'(+ 1 2)))) (+ 5 (s)))''', 8),
+    ('''(let ((a 4)) (+ a a))''', 8),
     # ('''(for x in '(1 2 3) x)''', 3)
 ]
 
