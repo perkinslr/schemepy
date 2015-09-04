@@ -72,7 +72,7 @@ def add_globals(env):
         'map': map,
         'in': lambda x, y: x in y,
         'bool': bool,
-        'eval': scheme.eval.Exec,
+        'eval': lambda *x: scheme.eval.Exec(x),
         'last': last,
         'display': lambda x, port=sys.stdout: port.write(x.replace('~n', '\n') if isa(x, (str, unicode)) else str(x))})
     from repl import repl

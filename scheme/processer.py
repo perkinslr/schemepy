@@ -6,7 +6,6 @@ from scheme.procedure import Procedure, SimpleProcedure
 from scheme.macro import Macro, MacroSymbol
 from scheme.utils import deepcopy, expand_quotes
 import scheme.utils
-print scheme.utils
 from zope.interface import providedBy
 from scheme.symbol import Symbol
 from Queue import LifoQueue, Empty
