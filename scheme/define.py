@@ -4,7 +4,7 @@ from scheme.macro import Macro, SimpleMacro
 from scheme.procedure import SimpleProcedure
 from processer import Globals
 from scheme.symbol import Symbol
-
+from scheme import jit
 
 class define(object):
     implements(Macro)
@@ -41,6 +41,10 @@ class define(object):
                 processer.process(retval, env)
             else:
                 env[name] = SimpleProcedure([args] + rest, env).setName(name)
+                if jit.enabled:
+                    f = jit.makeFunction(env[name])
+                    if f:
+                        env[name]=f
             processer.popStack(None)
         # processer.ast[processer.stackPointer]=None
         processer.stackPointer += 1
@@ -87,6 +91,10 @@ class Set(object):
                 if not name.isBound(env):
                     raise NameError("Name %s unbound in enclosing namespaces" % name)
                 env[name] = SimpleProcedure([args] + rest, env).setName(name)
+                if jit.enabled:
+                    f = jit.makeFunction(env[name])
+                    if f:
+                        env[name]=f
         processer.popStack(None)
         # processer.ast[processer.stackPointer]=None
         processer.stackPointer += 1
