@@ -5,7 +5,7 @@ DEBUG = False
 debug_settings={ 
   'pushStack':False,        #watch increases in stack depth
   'popStack':False,         #watch decreses in stack depth
-  'discardedFraames':False, #save discarded frames, memory leak!!!
+  'discardedFrames':False, #save discarded frames, memory leak!!!
   'repl':False,             #prints more information on exceptions in the repl
   'syntax':False,           #prints informtion when doing syntax
   'symbols':False,          #prints line numbers in symbols' repr
@@ -18,7 +18,13 @@ def getDebug(key):
       return debug_settings[key]
     return False
 
-setDebug=debug_settings.__setitem__
+def setDebug(k, v):
+  if k=='all':
+    for k in debug_settings:
+      debug_settings[k]=v
+  else:
+    debug_settings[k]=v
+
 
 
 def LOG(SECTION, *args):
@@ -30,3 +36,6 @@ def LOG(SECTION, *args):
     print
 
 
+def setAll(b):
+  for i in debug_settings:
+    debug_settings[i]=b

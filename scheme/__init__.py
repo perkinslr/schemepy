@@ -25,3 +25,6 @@ import define_syntax
 import quasisyntax
 
 from . import builtins
+
+p = processer.processer
+r = repl.repl

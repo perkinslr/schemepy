@@ -34,10 +34,10 @@ def car(x):
     return x[0]
 
 
-def schemeApply(callable_, args):
+def schemeApply(callable_, args, kw={}):
     if Macro in providedBy(callable_) or Procedure in providedBy(callable_):
         return callable_(scheme.processer.current_processer, args)
-    return callable_(*args)
+    return callable_(*args, **kw)
 
 
 def List(*x):
@@ -49,6 +49,8 @@ def add_globals(env):
     env.update(vars(math))
     env.update(vars(cmath))
     env.update({
+        'globals':env,
+        'dict':dict,
         'open-output-string': lambda: cStringIO.StringIO(),
         'get-output-string': lambda ioObj: ioObj.getvalue(),
         '%': op.mod,
@@ -73,6 +75,11 @@ def add_globals(env):
         'in': lambda x, y: x in y,
         'bool': bool,
         'eval': lambda *x: scheme.eval.Exec(x),
+        'execfile': scheme.eval.Eval,
+        'str':str,
+        'unicode':unicode,
+        'int':int,
+        'zip':zip,
         'last': last,
         'display': lambda x, port=sys.stdout: port.write(x.replace('~n', '\n') if isa(x, (str, unicode)) else str(x))})
     from repl import repl

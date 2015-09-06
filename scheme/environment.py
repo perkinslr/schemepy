@@ -1,6 +1,6 @@
 # noinspection PyTypeChecker
 
-
+import debug
 
 class Environment(dict):
     def __init__(self, parent, *args, **kw):
@@ -31,9 +31,12 @@ class Environment(dict):
         return '<Environment parent=%r, %s>' % (self.parent, dict.__repr__(self))
 
 
+ses=[]
 
 class SyntaxEnvironment(dict):
     def __init__(self, *args, **kw):
+        if debug.debug_settings['syntax']:
+            ses.append(self)
         super(SyntaxEnvironment, self).__init__(*args, **kw)
         self.env=self
     parent = None
@@ -64,18 +67,25 @@ class SyntaxEnvironment(dict):
                 o.append(self.get_all(i))
             return zip(*o)
         l = list(self.iget_all(item))
-        if len(l) == 1:
-            return l[0]
+        #if len(l) == 1:
+        #    return l[0]
         return l
     def iget_all(self, item):
         for i, v in self.walk(pairs=True):
             if i == item:
                 yield v
     def __getitem__(self, item):
+        o = []
+        found = False
         for i, v in self.walk(pairs=True):
             if i == item:
-                return v
-        raise IndexError()
+                found = True
+                if i.ellipsis:
+                    o.extend(v)
+                else:
+                    o.append(v)
+                #return v
+        return o
     def __setitem__(self, item, value):
         from scheme.PatternMatcher import PatternMatcher
         if isinstance(item, PatternMatcher):

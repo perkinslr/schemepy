@@ -122,9 +122,14 @@ lispy_tests = [
                         (syntax (if test (begin e e* ...)))))))''', None),
     ('''(when (< 0 5) "true")''', "true"),
     ('''(when (> 0 5) "true")''', False),
-    ('''(let-syntax ((s (lambda (x) #'(+ 1 2)))) (+ 5 (s)))''', 8),
+   # ('''(let-syntax ((s (lambda (x) #'(+ 1 2)))) (+ 5 (s)))''', 8),
     ('''(let ((a 4)) (+ a a))''', 8),
-    # ('''(for x in '(1 2 3) x)''', 3)
+    ('''(let ((a (+ 5 6))) (+ a a))''', 22),
+    ('''(let ((a (+ 5 6)) (b 11)) (+ a b) b)''', 11),
+     ('''(for x in '(1 2 3) x)''', 3),
+     ('''(let () 3)''', 3),
+     ('''(let loop ((i 1)) i)''', 1),
+     ('''(let loop ((i 1)) (if (= 10 i) #t (loop (+ i 1))))''', True),
 ]
 
 
@@ -154,5 +159,13 @@ def test(tests, name=''):
 
 
 if __name__ == '__main__':
+    import sys
+    if 'jit' in sys.argv:
+        scheme.jit.enabled=True
     from scheme.eval import Eval, p
+    import time
+    st = time.time()
     test(lis_tests + lispy_tests, 'lispy.py')
+    et = time.time()
+    print et-st
+    
