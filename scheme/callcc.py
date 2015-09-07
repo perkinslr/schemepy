@@ -19,9 +19,13 @@ class CCC(Symbol):
 class callcc(object):
     implements(Procedure)
     def __init__(self):
-        print 22, self
         self.env = Globals.Globals
-    def __call__(self, processer, ast):
+    def __call__(self, *args):
+        if len(args) == 1:
+            ast=args[0]
+            processer = p
+        else:
+            processer, ast = args
         # raise Exception()
         continuation = processer.continuation
         continuation['initialCallDepth'] += 1
@@ -51,7 +55,12 @@ class callccCallback():
         self.env = Globals
         self.continuation = continuation
         self.ccc=ccc
-    def __call__(self, processer, ast):
+    def __call__(self, *args):
+        if len(args) == 1:
+            ast=args
+            processer = p
+        else:
+            processer, ast = args
         processer.dumpStack()
         # if processer.callStack.queue:
         #processer.callStack.queue[-1][2]=self.continuation['stackPointer']

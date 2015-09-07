@@ -29,6 +29,10 @@ class Environment(dict):
         if self is Globals.Globals:
             return '{GLOBALS}'
         return '<Environment parent=%r, %s>' % (self.parent, dict.__repr__(self))
+    def __getitem__(self, item):
+        if self.parent is not None:
+            return super(Environment, self).__getitem__(item) if item in self else self.parent.__getitem__(item)
+        return super(Environment, self).__getitem__(item)
 
 
 ses=[]

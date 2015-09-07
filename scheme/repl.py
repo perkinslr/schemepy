@@ -11,7 +11,7 @@ import scheme.processer
 processer = scheme.processer.processer
 import sys
 
-
+Es=[]
 def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
     global parser
     parser = Parser(f)
@@ -35,10 +35,12 @@ def repl(f=sys.stdin, prompt='schemepy> ', of=sys.stdout):
                     raise e
             except Exception as e:
                 if debug.getDebug('repl'):
+                    Es.append(e)
                     import traceback
                     print traceback.format_exc()
                     print processer.ast
-                    print processer.children[-1].ast
+                    if processer.children:
+                        print processer.children[-1].ast
                     print scheme.processer.current_processer.ast
                 r = e
             if r is not None and of:

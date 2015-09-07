@@ -3,14 +3,17 @@ __author__ = 'perkins'
 DEBUG = False
 
 debug_settings={ 
-  'pushStack':False,        #watch increases in stack depth
-  'popStack':False,         #watch decreses in stack depth
-  'discardedFrames':False, #save discarded frames, memory leak!!!
-  'repl':False,             #prints more information on exceptions in the repl
-  'syntax':False,           #prints informtion when doing syntax
-  'symbols':False,          #prints line numbers in symbols' repr
-  'patternMatcher':False,   #prints information when matching symbols
-  'tracebck':False          #returns extra informtion in ReportProcesser on errors
+  'pushStack':False,           #watch increases in stack depth
+  'popStack':False,            #watch decreses in stack depth
+  'discardedFrames':False,     #save discarded frames, memory leak!!!
+  'repl':False,                #prints more information on exceptions in the repl
+  'syntax':False,              #prints informtion when doing syntax
+  'symbols':False,             #prints line numbers in symbols' repr
+  'patternMatcher':False,      #prints information when matching symbols
+  'tracebck':False,            #returns extra informtion in ReportProcesser on errors
+  'jit-crash-on-error': False, #makes JIT errors raise exceptions
+  'jit': True,
+  'jit-one-opcode-per-line': False,
 }
 
 def getDebug(key):

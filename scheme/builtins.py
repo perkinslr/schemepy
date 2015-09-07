@@ -49,6 +49,7 @@ def add_globals(env):
     env.update(vars(math))
     env.update(vars(cmath))
     env.update({
+        'list-type':list,
         'globals':env,
         'dict':dict,
         'open-output-string': lambda: cStringIO.StringIO(),

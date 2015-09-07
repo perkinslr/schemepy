@@ -22,6 +22,7 @@ class SimpleProcedure(object):
         self.ast = ast
         self.env = env
         self.name = None
+        self.lineno = None
     def __call__(self, processer, args):
         retval = None
         env = Environment(self.env)
@@ -53,6 +54,8 @@ class SimpleProcedure(object):
         return retval
     def setName(self, name):
         self.name = name
+        if isinstance(name, Symbol):
+            self.lineno = name.line
         return self
     def __repr__(self):
         if self.name:

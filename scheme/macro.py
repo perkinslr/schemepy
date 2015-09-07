@@ -3,7 +3,7 @@ from zope.interface import providedBy
 from scheme.debug import LOG
 from scheme.procedure import Procedure
 from scheme.utils import copy_with_quasiquote, deepcopy
-
+import scheme
 
 __author__ = 'perkins'
 
@@ -11,6 +11,7 @@ from zope import interface
 from scheme.symbol import Symbol
 from scheme.environment import Environment
 import scheme
+
 
 
 # noinspection PyUnusedLocal,PyMethodParameters
@@ -51,6 +52,17 @@ class MacroSymbol(Symbol):
             self.env.parent = Environment(scheme.Globals.Globals, env)
         # self.env.parent = env.parent if env is not None and hasattr(env, 'parent') else scheme.Globals.Globals
         return self
+    def __call__(self, *args):
+        from jit import isaProcedure
+        f = self.toObject({})
+        if args and isinstance(args[0], scheme.processer.Processer):
+            processer,ast=args
+        else:
+            processer=scheme.processer.current_processer
+            ast=list(args)
+        if isaProcedure(f):
+            return f(processer, ast)
+        return f(*ast)
 
 
 class SimpleMacro(object):
