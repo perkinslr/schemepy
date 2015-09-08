@@ -6,12 +6,11 @@ from scheme.procedure import Procedure, SimpleProcedure
 from scheme.macro import Macro, MacroSymbol
 from scheme.utils import deepcopy, expand_quotes
 import scheme.utils
-print scheme.utils
 from zope.interface import providedBy
 from scheme.symbol import Symbol
 from Queue import LifoQueue, Empty
 from scheme import debug
-
+from scheme.debug import LOG
 
 current_processer = None
 discarded_frames = []
@@ -19,8 +18,8 @@ discarded_frames = []
 
 class Processer(object):
     def __init__(self, parent=None):
-        # if current_processer:
-        # raise Exception()
+#        if current_processer:
+#            raise Exception()
         self.children = []
         self.parent = parent
         if parent:
@@ -32,6 +31,7 @@ class Processer(object):
         self.stackPointer = 0
         self.cenv = None
         self.initialCallDepth = 0
+        self.shouldAbort = None
     def getContinuation(self):
         if self.parent:
             pc = self.parent.continuation
@@ -55,7 +55,7 @@ class Processer(object):
         self.ast, self.cenv, self.stackPointer, garbage = self.callStack.get_nowait()
         self.callDepth -= 1
     def pushStack(self, ast):
-        if debug.DEBUG > 1:
+        if debug.getDebug('pushStack'):
             import traceback
             traceback.print_stack()
             print 'push', self.ast, self.stackPointer
@@ -65,8 +65,10 @@ class Processer(object):
         self.stackPointer = 0
         self.callDepth += 1
     def popStack(self, retval, wrap=True):
-        if debug.DEBUG > 1:
+        if debug.getDebug('popStack'):
             import traceback
+
+
             traceback.print_stack()
             print 'pop', self.ast, retval, self.stackPointer,
             if len(self.callStack.queue):
@@ -78,20 +80,19 @@ class Processer(object):
                 retval = MacroSymbol(retval).setObj(retval)
             else:
                 retval = MacroSymbol(retval).setEnv({retval: retval.toObject(self.cenv)})
-        if debug.DEBUG:
+        if debug.getDebug('discardedFrames'):
             discarded_frames.append((self.ast, self.cenv, self.stackPointer))
         try:
             self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
         except Empty as e:
-            e.ret = e.retval=self.ast[-1]
+            e.ret = e.retval = self.ast[-1]
             raise e
         self.callDepth -= 1
         if rv:
-            if self.stackPointer>=len(self.ast):
+            if self.stackPointer >= len(self.ast):
                 self.popStack(retval)
             self.ast[self.stackPointer] = retval
-        if debug.DEBUG > 1:
-            print self.ast, self.stackPointer
+        LOG('popStack', self.ast, self.stackPointer)
     def dumpStack(self):
         while self.callDepth > 0 and self.callStack.queue:
             self.popStackN()
@@ -100,67 +101,56 @@ class Processer(object):
         self.initialCallDepth = 0
         self.ast = None
         self.callDepth = 0
-    tcd=0
+    tcd = 0
     def doProcess(self, _ast, env=None, callDepth=None, ccc=False, quotesExpanded=False):
-        print 102
         if not ccc:
             self.dumpStack()
-        def LOG(*stuff):
-            print  stuff
-        LOG(97, _ast)
         try:
             return self.process(_ast, env, callDepth, quotesExpanded)
         except callCCBounce as e:
-            print >> open('/tmp/ccc.log','a'), (e.continuation, e.retval)
+            print >> open('/tmp/ccc.log', 'a'), (e.continuation, e.retval)
             # noinspection PyUnresolvedReferences
-            continuation=e.continuation
-            callDepth=self.callDepth
+            continuation = e.continuation
+            callDepth = self.callDepth
             icd = self.initialCallDepth
             self.dumpStack()
-            self.callStack.queue=deepcopy(continuation['callStack'])
-            self.callDepth=continuation['callDepth']
-            self.initialCallDepth=0
-            LOG(109, self.ast)
+            self.callStack.queue = deepcopy(continuation['callStack'])
+            self.callDepth = continuation['callDepth']
+            self.initialCallDepth = 0
+            LOG('call/cc bounce', 109, self.ast)
             self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
-            #self.callStack.queue.pop(0)
+            # self.callStack.queue.pop(0)
             #self.callDepth-=1
-            LOG(111, self.ast)
-            seek=True
+            LOG('call/cc bounce', self.ast)
+            seek = True
             while True:
                 for i in xrange(len(self.ast)):
-                    LOG(114, self.ast[i])
-                    if isinstance(self.ast[i],list):
-                        LOG(116, self.ast[i][0],e.ccc)
-                    if isinstance(self.ast[i],list) and self.ast[i][0] is e.ccc:
-                        LOG(118)
-                        self.ast[i]=e.retval
-                        self.stackPointer=i+1
-                        #a = self.ast
-                        #self.popStackN()
-                        #self.ast=a
-                        seek=False
-                        break
+                    if isinstance(self.ast[i], list):
+                        if isinstance(self.ast[i], list) and self.ast[i][0] is e.ccc:
+                            self.ast[i] = e.retval
+                            self.stackPointer = i + 1
+                            #a = self.ast
+                            #self.popStackN()
+                            #self.ast=a
+                            seek = False
+                            break
                 if not seek:
                     break
                 self.ast, self.cenv, self.stackPointer, rv = self.callStack.get_nowait()
-                print (135, self.ast)
 
-            print 155, self.ast, self.callDepth, self.callStack.queue, continuation['initialCallDepth'], continuation['targetCallDepth']
             self.tcd += 1
             while self.callDepth > 1:
                 try:
-                    print(148, self.callDepth, self.ast)
                     self.doProcess(self.ast, self.cenv, 0, True)
                 except TypeError as e3:
-                    print(162)
                     if not callable(self.ast[0]):
                         try:
                             self.popStack(self.ast[-1])
                         except Empty as e5:
                             if hasattr(e5, 'ret'):
-                                    return e5.ret
+                                return e5.ret
                             if hasattr(e5, 'retval'):
-                                    return e5.retval
+                                return e5.retval
                             raise e5
                         #return self.doProcess(self.ast, self.cenv, 0, True)
                     else:
@@ -174,7 +164,6 @@ class Processer(object):
                     raise e4
             return self.ast[-1]
         except Empty as e1:
-            LOG(166)
             if hasattr(e1, 'ret'):
                 return e1.ret
             if hasattr(e1, 'retval'):
@@ -228,6 +217,8 @@ class Processer(object):
                 else:
                     return this
             while True:
+                if self.shouldAbort:
+                    raise self.shouldAbort
                 if self.stackPointer >= len(self.ast) and self.callDepth <= self.initialCallDepth:
                     return self.ast[-1]
                 if self.stackPointer >= len(self.ast):
@@ -250,9 +241,11 @@ class Processer(object):
                                 e[params[-1]] = list(iter_args)
                             else:
                                 if (isinstance(args, list) and len(args) != len(params)):
-                                    raise TypeError("%r expected exactly %i arguments, got %i" % (self.ast[0], len(params), len(args)))
+                                    raise TypeError("%r expected exactly %i arguments, got %i" % (
+                                        self.ast[0], len(params), len(args)))
                                 if (not isinstance(args, list) and 1 != len(params)):
-                                    raise TypeError("%r expected exactly %i arguments, got %i" % (self.ast[0], len(params), len(args)))
+                                    raise TypeError("%r expected exactly %i arguments, got %i" % (
+                                        self.ast[0], len(params), len(args)))
                                 iter_args = iter(args)
                                 for idx, item in enumerate(params):
                                     e[item] = iter_args.next()
@@ -298,7 +291,7 @@ class Processer(object):
                         self.popStack(r)
                     elif not isinstance(r, list):
                         r1 = [lambda *x: r]
-                        #self.ast[:] = r1
+                        # self.ast[:] = r1
                         self.popStack(r1)
                     else:
                         self.ast[:] = r

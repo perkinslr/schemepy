@@ -73,6 +73,8 @@ class Symbol(unicode):
             return True
         except NameError:
             return False
+        except AttributeError:
+            return False
     def getEnv(self, env):
         while env is not None:
             if unicode(self) in env:
@@ -83,7 +85,7 @@ class Symbol(unicode):
             return Globals
         raise NameError(u"Symbol '%s' undefined in enclosing environments" % self)
     def __repr__(self):
-        if debug.DEBUG:
+        if debug.getDebug('symbols'):
             return '<Symbol %s (line %i)>' % (self, self.line)
         return str(self)
     def __bool__(self):
