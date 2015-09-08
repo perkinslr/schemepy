@@ -5,6 +5,7 @@
 # ############### Tests for lis.py and lispy.py
 import scheme.symbol
 import scheme.procedure
+import types
 
 
 lis_tests = [
@@ -137,17 +138,20 @@ def test(tests, name=''):
     import scheme.Globals
     "For each (exp, expected) test case, see if eval(parse(exp)) == expected."
     fails = 0
-    for (x, expected) in tests:
+    passes = 0
+    for idx, (x, expected) in enumerate(tests):
         try:
+            print idx, x,
             result = Eval(x)
             if isinstance(result, scheme.symbol.Symbol):
                 if result.isBound(scheme.Globals.Globals):
                     result = result.toObject(scheme.Globals.Globals)
-            print x, '=>', repr(result)
+            print '=>', repr(result)
             ok = (result == expected) or expected is None
-            if not ok and type(expected) == type:
-                if isinstance(result, expected):
-                    ok = True
+            if not ok and type(expected) == type or type(expected) == types.ClassType:
+                ok = isinstance(result, expected)
+            if not ok and expected == scheme.procedure.SimpleProcedure:
+                ok = isinstance(result, types.FunctionType)
         except Exception as e:
             p.dumpStack()
             print x, '=raises=>', type(e).__name__, e
@@ -162,10 +166,19 @@ if __name__ == '__main__':
     import sys
     if 'jit' in sys.argv:
         scheme.jit.enabled=True
+    if 'lambdajit' not in sys.argv:
+        scheme.jit.lambdas_enabled = False
+    if 'unsafejit' in sys.argv:
+        scheme.jit.unsafe_enabled = True
     from scheme.eval import Eval, p
     import time
     st = time.time()
-    test(lis_tests + lispy_tests, 'lispy.py')
+    if sys.argv[-1].isdigit():
+        num = int(sys.argv[-1])
+    else:
+        num=1
+    for i in xrange(num):
+        test(lis_tests + lispy_tests, 'lispy.py')
     et = time.time()
     print et-st
     
