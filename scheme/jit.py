@@ -6,6 +6,7 @@ from procedure import SimpleProcedure
 from symbol import Symbol
 import scheme.debug
 import operator as op
+import warnings
 from scheme.Globals import Globals
 import dis
 import time
@@ -24,7 +25,9 @@ labelidx=count()
 
 def lookup_value(v, e):
     if isinstance(v, Symbol):
-        return v.toObject(e)
+        if v.isBound(e):
+            return v.toObject(e)
+        return v
     return e[v]
 
 def isaProcedure(obj):
@@ -192,10 +195,17 @@ class Loader(object):
                 bytecode.add(CALL_FUNCTION,2,0)
                 #raise ValueError("Trying to load nonlocal value: %r"%o)
         else:
+            if isinstance(o, MacroSymbol):
+                return self.loadItem(o.toObject({}), bytecode)
             print 156,constants
             print 157,varnames
             print 158,names
-            raise ValueError("Trying to load unknown value: %r"%o)
+            if unstable_enabled:
+                print type(o)
+                warnings.warn("Trying to load unknown value: %r, assuming constant"%o)
+                self.loadExtraConstant(o,bytecode)
+            else:
+                raise ValueError("Trying to load unknown value: %r"%o)
 
 class label(object):
     def __init__(self, name):
@@ -287,7 +297,6 @@ def write_code(obj, env=None, p=None):
     bytecode = Bytecode(lineno=obj.lineno or 0)
     loader = Loader(constants, varnames, names, obj.env, bytecode, stackptr)
     def write_nested_code(statement):
-        print 280, statement
         if not isinstance(statement, list):
             if isinstance(statement, Symbol):
                 bytecode.nextLine(statement.line)
@@ -347,7 +356,7 @@ def write_code(obj, env=None, p=None):
             stackptr - 1
             bytecode.append(label('false%i'%lidx))
             return True
-        elif isinstance(func, (BuiltinFunctionType, function)):
+        elif isinstance(func, (BuiltinFunctionType, function, type)):
             isp = stackptr.ptr
             istatement = iter(statement[1:])
             loader.loadItem(statement[0])
@@ -367,7 +376,6 @@ def write_code(obj, env=None, p=None):
             val = statement[2]
             if isinstance(val, list):
                 if not write_nested_code(val):
-                    print 358
                     return False
             else:
                 loader.loadItem(val)
@@ -416,18 +424,15 @@ def write_code(obj, env=None, p=None):
                     return False
             return True
         elif isaProcedure(func):
-            print >>sys.stderr, 402, func
             ls = len(statement)-1
             loader.loadItem(func)
             if func is not obj:
-                print >> sys.stderr, 405, func, obj
                 loader.loadItem(scheme.processer.processer)
                 bytecode.add(DUP_TOP)
                 bytecode.add(LOAD_ATTR,names.index("pushStack")%256,names.index("pushStack")//256)
                 loader.loadItem([None])
                 bytecode.add(CALL_FUNCTION,1,0)
                 bytecode.add(POP_TOP)
-            print >> sys.stderr, 412
             for arg in statement[1:]:
                 if not write_nested_code(arg):
                     return False
@@ -489,9 +494,7 @@ def write_code(obj, env=None, p=None):
                 print 470, 'statically compiling and linking lambda'
                 f = func(p, statement[1:]).toObject({})
                 try:
-                    print f,type(f)
                     if isinstance(f, SimpleProcedure):
-                        print 482
                         f = makeFunction(f)
                 finally:
                     p.popStackN()
@@ -534,25 +537,13 @@ def write_code(obj, env=None, p=None):
 
 
 def makeFunction(obj, env=None, p=None):
-    from syntax_expand import syntax_expand
-    try:
-        ast = obj.ast[1]
-        p1 = scheme.processer.Processer()
-        p1.env = scheme.processer.processer.env
-        p1.ast=[None]
-        syn = syntax_expand(p1, ast)
-        while syn!=ast:
-            ast=syn
-            syn = syntax_expand(scheme.processer.processer, syn)
-        obj.ast[1]=syn
-    except Exception as e:
-        print 515,e
-        return obj
-    print 517
+    from syntax_expand import expandObj
     if scheme.debug.debug_settings['jit-crash-on-error']:
+        expandObj(obj)
         c = write_code(obj, env, p)
     else:
         try:
+            expandObj(obj)
             c = write_code(obj, env, p)
         except:
             return obj

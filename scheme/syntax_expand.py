@@ -3,6 +3,7 @@ from zope.interface import providedBy
 from macro import Symbol
 from scheme.macro import SimpleMacro
 from scheme.define_syntax import DefinedSyntax
+import scheme
 def syntax_expand(processer, params):
     if not isinstance(params, list) or not params:
         return params
@@ -28,7 +29,8 @@ def syntax_expand(processer, params):
 
 
 
-def expandObj(processer, obj):
+def expandObj(obj):
+    processer = scheme.processer.Processer()
     processer.dumpStack()
     processer.ast=[None]
     ast = obj.ast[1]

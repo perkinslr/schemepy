@@ -73,6 +73,8 @@ class Symbol(unicode):
             return True
         except NameError:
             return False
+        except AttributeError:
+            return False
     def getEnv(self, env):
         while env is not None:
             if unicode(self) in env:
