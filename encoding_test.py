@@ -1,4 +1,6 @@
 #encoding: scheme_encode
+"""lines beginning with ! execute i the scheme environment
+The encoding must be copied/linked to <python_install>/encodings"""
 print 5
 
 !(define (double x) (+ x x))
