@@ -151,57 +151,59 @@ def symbols_to_values(lst, env):
 
 
 def expand_syntax(lst):
-    for idx, this in enumerate(lst):
-        if this == "#'":
-            quoteTarget = lst.pop(idx + 1)
-            if quoteTarget == "#'":
-                def getQuoteTarget():
-                    qt = lst.pop(idx + 1)
-                    if qt == "#'":
-                        return [Symbol('syntax'), getQuoteTarget()]
-                    return qt
-                quoteTarget = [Symbol('syntax'), getQuoteTarget()]
-            lst[idx] = [Symbol('syntax'), quoteTarget]
-        elif this == "#`":
-            quoteTarget = lst.pop(idx + 1)
-            if quoteTarget == "#`":
-                def getQuoteTarget():
-                    qt = lst.pop(idx + 1)
-                    if qt == "`":
-                        return [Symbol('quasisyntax'), getQuoteTarget()]
-                    return qt
-                quoteTarget = [Symbol('quasisyntax'), getQuoteTarget()]
-            lst[idx] = [Symbol('quasisyntax'), quoteTarget]
-        elif isinstance(this, list):
-            expand_quotes(this)
+    if "#'" in str(lst) or '#`' in str(lst):
+        for idx, this in enumerate(lst):
+            if this == "#'":
+                quoteTarget = lst.pop(idx + 1)
+                if quoteTarget == "#'":
+                    def getQuoteTarget():
+                        qt = lst.pop(idx + 1)
+                        if qt == "#'":
+                            return [Symbol('syntax'), getQuoteTarget()]
+                        return qt
+                    quoteTarget = [Symbol('syntax'), getQuoteTarget()]
+                lst[idx] = [Symbol('syntax'), quoteTarget]
+            elif this == "#`":
+                quoteTarget = lst.pop(idx + 1)
+                if quoteTarget == "#`":
+                    def getQuoteTarget():
+                        qt = lst.pop(idx + 1)
+                        if qt == "`":
+                            return [Symbol('quasisyntax'), getQuoteTarget()]
+                        return qt
+                    quoteTarget = [Symbol('quasisyntax'), getQuoteTarget()]
+                lst[idx] = [Symbol('quasisyntax'), quoteTarget]
+            elif isinstance(this, list):
+                expand_quotes(this)
     return lst
 
 
 
 def expand_quotes(lst):
-    for idx, this in enumerate(lst):
-        if this == "'":
-            quoteTarget = lst.pop(idx + 1)
-            if quoteTarget == "'":
-                def getQuoteTarget():
-                    qt = lst.pop(idx + 1)
-                    if qt == "'":
-                        return [Symbol('quote'), getQuoteTarget()]
-                    return qt
-                quoteTarget = [Symbol('quote'), getQuoteTarget()]
-            lst[idx] = [Symbol('quote'), quoteTarget]
-        elif this == "`":
-            quoteTarget = lst.pop(idx + 1)
-            if quoteTarget == "`":
-                def getQuoteTarget():
-                    qt = lst.pop(idx + 1)
-                    if qt == "`":
-                        return [Symbol('quasiquote'), getQuoteTarget()]
-                    return qt
-                quoteTarget = [Symbol('quasiquote'), getQuoteTarget()]
-            lst[idx] = [Symbol('quasiquote'), quoteTarget]
-        elif isinstance(this, list):
-            expand_quotes(this)
+    if "'" in str(lst) or "`" in str(lst):
+        for idx, this in enumerate(lst):
+            if this == "'":
+                quoteTarget = lst.pop(idx + 1)
+                if quoteTarget == "'":
+                    def getQuoteTarget():
+                        qt = lst.pop(idx + 1)
+                        if qt == "'":
+                            return [Symbol('quote'), getQuoteTarget()]
+                        return qt
+                    quoteTarget = [Symbol('quote'), getQuoteTarget()]
+                lst[idx] = [Symbol('quote'), quoteTarget]
+            elif this == "`":
+                quoteTarget = lst.pop(idx + 1)
+                if quoteTarget == "`":
+                    def getQuoteTarget():
+                        qt = lst.pop(idx + 1)
+                        if qt == "`":
+                            return [Symbol('quasiquote'), getQuoteTarget()]
+                        return qt
+                    quoteTarget = [Symbol('quasiquote'), getQuoteTarget()]
+                lst[idx] = [Symbol('quasiquote'), quoteTarget]
+            elif isinstance(this, list):
+                expand_quotes(this)
     return expand_syntax(lst)
 
 
